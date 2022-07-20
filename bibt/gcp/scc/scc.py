@@ -49,7 +49,7 @@ def get_all_assets(filter, gcp_org_id, page_size=1000, credentials=None):
     """
     return _get_all_assets_iter(
         request={
-            "parent": f"organizations/{gcp_org_id}/sources/-",
+            "parent": f"organizations/{gcp_org_id}",
             "filter": filter,
             "page_size": page_size,
         },
@@ -89,7 +89,7 @@ def get_all_findings(filter, gcp_org_id, page_size=1000, credentials=None):
     """
     return _get_all_findings_iter(
         request={
-            "parent": f"organizations/{gcp_org_id}",
+            "parent": f"organizations/{gcp_org_id}/sources/-",
             "filter": filter,
             "page_size": page_size,
         },
@@ -172,7 +172,7 @@ def get_finding(name, gcp_org_id, credentials=None):
     """
     findings = _get_all_findings_iter(
         request={
-            "parent": f"organizations/{gcp_org_id}",
+            "parent": f"organizations/{gcp_org_id}/sources/-",
             "filter": f"name={name}",
             "page_size": 1,
         },
