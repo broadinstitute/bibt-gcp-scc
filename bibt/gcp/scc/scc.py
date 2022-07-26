@@ -11,7 +11,6 @@ import logging
 from datetime import datetime
 
 from google.cloud import securitycenter
-from google.cloud.securitycenter_v1 import Finding
 from google.protobuf import field_mask_pb2
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
@@ -186,6 +185,41 @@ def get_finding(name, gcp_org_id, credentials=None):
             f'No finding object returned for name="{name}" in '
             f"organizations/{gcp_org_id}"
         )
+
+
+def parse_notification(notification):
+    """This method takes the notification received from a SCC Notification Pubsub
+    and returns a Python object.
+
+    .. code:: python
+
+        import base64
+        from bibt.gcp import scc
+        def main(event, context):
+            raw_notification = base64.b64decode(event["data"]).decode("utf-8")
+            notification = scc.parse_notification(raw_notification)
+            print(notification.finding.name, notification.finding.category, notification.resource.name)
+
+    :type notification: :py:class:`str` OR :py:class:`dict`
+    :param notification: the notification to parse. may be either a dictionary or a json string.
+
+    :rtype: :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.ListFindingsResponse.ListFindingsResult`
+    :returns: the finding notification as a Python object.
+
+    :raises TypeError: if it is passed anything aside from a :py:class:`str` or :py:class:`dict`.
+    """
+    from google.cloud.securitycenter_v1.types import ListFindingsResponse
+
+    if isinstance(notification, dict):
+        import json
+
+        notification = json.dumps(notification)
+    elif not isinstance(notification, str):
+        raise TypeError(
+            "Notification must be either a string or a dict! "
+            f"You passed a {type(notification).__name__}"
+        )
+    return ListFindingsResponse.ListFindingsResult.from_json(notification)
 
 
 def set_finding_state(finding_name, state="INACTIVE", credentials=None):

@@ -2,6 +2,13 @@
 
 [PyPI History](https://pypi.org/project/bibt-gcp-scc/#history)
 
+## 0.2.2 (2022-07-26)
+
+### Features
+
+* **New function:** `parse_notification()` may be used to generate a Python object from a SCC notification received via pubsub.
+* Removed unused imports.
+
 ## 0.2.0 (2022-07-18)
 
 ### Features
