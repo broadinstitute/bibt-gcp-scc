@@ -11,7 +11,10 @@ import logging
 from datetime import datetime
 
 from google.cloud import securitycenter
+from google.cloud.securitycenter_v1 import Finding
 from google.protobuf import field_mask_pb2
+from inflection import camelize
+from inflection import underscore
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
@@ -140,6 +143,59 @@ def get_asset(resource_name, gcp_org_id, credentials=None):
             f'security_center_properties.resource_name="{resource_name}" in '
             f"organizations/{gcp_org_id}"
         )
+
+
+def get_value(obj, path):
+    """Fetches the value in the given ``obj`` according to the given ``path``. Works on objects and dicts.
+    Supports arrays in a few ways:
+        - if the ``path`` is ``resource.folders[].resource_folder_display_name`` OR
+            ``resource.folders[0].resource_folder_display_name`` , it will just consider the
+            first element in the array.
+        - if the ``path`` is ``resource.folders[*].resource_folder_display_name`` ,
+            it will return a list of ``resource_folder_display_name`` values, one for each folder.
+    Additionally, if unsuccessful with exactly what was passed as ``path``, it will convert and try
+        both camelized and underscored attribute names (``resource_folder_display_name`` and ``resourceFolderDisplayName``).
+        As a last resort it will try a key lookup (e.g. ``obj[key]``).
+
+    .. code:: python
+
+        from bibt.gcp import scc
+        f = scc.get_finding(name="organizations/123123/sources/123123/findings/123123", gcp_org_id=123123)
+        v = scc.get_value(
+            f,
+            "finding.source_properties.abuse_target_ips"
+        )
+        print(v)
+
+    :type obj: :py:class:`object`
+    :param obj: the object from which to extract a value.
+
+    :type path: :py:class:`str`
+    :param path: the path to follow to find the desired value(s).
+
+    :returns: whatever it finds at the end of the specified ``path``.
+
+    :raises KeyError: if the next part of the path cannot be found.
+    """
+    if path == "":
+        return obj
+    attr, _, remaining = path.partition(".")
+    grab_one = grab_all = False
+    if attr.endswith("[]"):
+        attr = attr[:-2]
+        grab_one = True
+    elif attr.endswith("[0]"):
+        attr = attr[:-2]
+        grab_one = True
+    elif attr.endswith("[*]"):
+        attr = attr[:-3]
+        grab_all = True
+    obj = _get(obj, attr)
+    if grab_one:
+        obj = obj[0]
+    elif grab_all:
+        return [get_value(_obj, remaining) for _obj in obj]
+    return get_value(obj, remaining)
 
 
 def get_finding(name, gcp_org_id, credentials=None):
@@ -330,3 +386,31 @@ def _get_all_assets_iter(request, credentials=None):
     """
     client = securitycenter.SecurityCenterClient(credentials=credentials)
     return client.list_assets(request)
+
+
+def _get(obj, attr):
+    """A helper function to get attributes. Works with objects as well as dictionaries.
+    Will attempt in this order: 1) exactly what was passed (obj.my_attr) 2) underscored (obj.my_attr) 3) camelized (obj.myAttr) 4) key (obj[attr])
+
+    Returns: whatever the value of the attribute is.
+    Raises: KeyError if the key could not be found in the object.
+    """
+    try:
+        value = getattr(obj, attr)
+    except AttributeError:
+        pass
+    try:
+        value = getattr(obj, underscore(attr))
+    except AttributeError:
+        pass
+    try:
+        value = getattr(obj, camelize(attr, False))
+    except AttributeError:
+        pass
+    try:
+        value = obj.get(attr)
+    except KeyError:
+        raise KeyError(
+            f"Could not find attribute value [{attr}] in object of type: {type(obj).__name__}"
+        )
+    return value
