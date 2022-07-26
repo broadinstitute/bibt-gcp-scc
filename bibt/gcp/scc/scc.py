@@ -396,21 +396,20 @@ def _get(obj, attr):
     Raises: KeyError if the key could not be found in the object.
     """
     try:
-        value = getattr(obj, attr)
+        return getattr(obj, attr)
     except AttributeError:
         pass
     try:
-        value = getattr(obj, underscore(attr))
+        return getattr(obj, underscore(attr))
     except AttributeError:
         pass
     try:
-        value = getattr(obj, camelize(attr, False))
+        return getattr(obj, camelize(attr, False))
     except AttributeError:
         pass
     try:
-        value = obj.get(attr)
-    except KeyError:
+        return obj.get(attr)
+    except (KeyError, AttributeError):
         raise KeyError(
             f"Could not find attribute value [{attr}] in object of type: {type(obj).__name__}"
         )
-    return value
