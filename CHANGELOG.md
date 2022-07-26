@@ -2,7 +2,7 @@
 
 [PyPI History](https://pypi.org/project/bibt-gcp-scc/#history)
 
-## 0.2.2 (2022-07-26)
+## 0.3.0 (2022-07-26)
 
 ### Features
 
