@@ -2,7 +2,7 @@
 
 [PyPI History](https://pypi.org/project/bibt-gcp-scc/#history)
 
-## 0.4.5 (2022-07-28)
+## 0.5.0 (2022-07-28)
 
 * `parse_notification()` now allows the option to ignore_unknown_fields when parsing. Additionally, it will intercept exceptions thrown when parsing and spit out its own TypeError.
 
