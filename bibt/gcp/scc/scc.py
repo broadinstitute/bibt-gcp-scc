@@ -13,6 +13,7 @@ from datetime import datetime
 from google.cloud import securitycenter
 from google.cloud.securitycenter_v1 import Finding
 from google.protobuf import field_mask_pb2
+from google.protobuf.json_format import ParseError
 from inflection import camelize
 from inflection import underscore
 
@@ -243,7 +244,7 @@ def get_finding(name, gcp_org_id, credentials=None):
         )
 
 
-def parse_notification(notification):
+def parse_notification(notification, ignore_unknown_fields=False):
     """This method takes the notification received from a SCC Notification Pubsub
     and returns a Python object.
 
@@ -259,10 +260,16 @@ def parse_notification(notification):
     :type notification: :py:class:`str` OR :py:class:`dict`
     :param notification: the notification to parse. may be either a dictionary or a json string.
 
+    :type ignore_unknown_fields: :py:class:`bool`
+    :param ignore_unknown_fields: whether or not unrecognized fields should be ignored when parsing.
+        fields may be unrecognized if they are added to the finding category in later releases of
+        google-cloud-securitycenter library.
+
     :rtype: :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.ListFindingsResponse.ListFindingsResult`
     :returns: the finding notification as a Python object.
 
-    :raises TypeError: if it is passed anything aside from a :py:class:`str` or :py:class:`dict`.
+    :raises TypeError: if it is passed anything aside from a :py:class:`str` or :py:class:`dict`, or
+        it has an issue parsing the finding into an object.
     """
     from google.cloud.securitycenter_v1.types import ListFindingsResponse
 
@@ -275,7 +282,16 @@ def parse_notification(notification):
             "Notification must be either a string or a dict! "
             f"You passed a {type(notification).__name__}"
         )
-    return ListFindingsResponse.ListFindingsResult.from_json(notification)
+    try:
+        return ListFindingsResponse.ListFindingsResult.from_json(
+            notification, ignore_unknown_fields=ignore_unknown_fields
+        )
+    except ParseError as e:
+        raise TypeError(
+            "Error encountered while attempting to parse into finding object, "
+            "try setting ignore_unknown_fields=True or updating the google-cloud-securitycenter package: "
+            f"{type(e).__name__}: {e}"
+        )
 
 
 def set_finding_state(finding_name, state="INACTIVE", credentials=None):
