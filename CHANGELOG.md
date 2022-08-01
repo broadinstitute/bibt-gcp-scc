@@ -2,6 +2,12 @@
 
 [PyPI History](https://pypi.org/project/bibt-gcp-scc/#history)
 
+## 0.6.0 (2022-08-01):
+
+* **[BREAKING CHANGE]** `set_security_marks()`: for setting security marks on an asset, now accepts a `resoruceName` instead of an `asset.name`. Additionally, when setting a mark on an asset, a `gcp_org_id` must be supplied.
+* **New function:** `get_security_marks()` returns security marks on an asset or finding as a dictionary.
+* fixed a typo in `get_finding()` which compiled an improper filter.
+
 ## 0.5.0 (2022-07-28)
 
 * `parse_notification()` now allows the option to ignore_unknown_fields when parsing. Additionally, it will intercept exceptions thrown when parsing and spit out its own TypeError.

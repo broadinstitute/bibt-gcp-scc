@@ -13,11 +13,6 @@ repos:
     -   id: requirements-txt-fixer
     -   id: trailing-whitespace
 
--   repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v1.5.7
-    hooks:
-    -   id: autopep8
-
 -   repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.1.10
     hooks:

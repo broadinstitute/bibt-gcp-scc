@@ -9,6 +9,7 @@ See the official Security Center Python Client documentation here: `link <https:
 """
 import logging
 from datetime import datetime
+from typing import Type
 
 from google.cloud import securitycenter
 from google.cloud.securitycenter_v1 import Finding
@@ -229,7 +230,7 @@ def get_finding(name, gcp_org_id, credentials=None):
     findings = _get_all_findings_iter(
         request={
             "parent": f"organizations/{gcp_org_id}/sources/-",
-            "filter": f"name={name}",
+            "filter": f'name="{name}"',
             "page_size": 1,
         },
         credentials=credentials,
@@ -242,6 +243,50 @@ def get_finding(name, gcp_org_id, credentials=None):
             f'No finding object returned for name="{name}" in '
             f"organizations/{gcp_org_id}"
         )
+
+
+def get_security_marks(scc_name, gcp_org_id, credentials=None):
+    """Gets security marks on an asset or finding in SCC and returns them as a dict.
+
+    .. code:: python
+
+        from bibt.gcp import scc
+        for k, v in scc.get_security_marks(
+            scc_name="organizations/123123/sources/123123/findings/123123",
+            os.environ["GCP_ORG_ID"]
+        ).items():
+            print(k, v)
+
+    :type scc_name: :py:class:`str`
+    :param scc_name: may be either an SCC ``finding.name`` or a GCP ``resourceName`` . format is:
+        ``organizations/123123/sources/123123/findings/123123`` or ``//storage.googleapis.com/my-bucket``.
+        **note this does not accept ``asset.name`` format!**
+
+    :type gcp_org_id: :py:class:`str`
+    :param gcp_org_id: the GCP organization ID under which to search.
+
+    :type credentials: :py:class:`google_auth:google.oauth2.credentials.Credentials`
+    :param credentials: the credentials object to use when making the API call, if not to
+        use the account running the function for authentication.
+
+    :rtype: :py:class:`dict`
+    :returns: a dictionary containing security marks as key/value pairs.
+
+    :raises TypeError: if scc_name is not in a recognizeable format.
+    """
+    if "/findings/" in scc_name:
+        logging.debug(f'Assuming type "finding" from scc_name format: {scc_name}')
+        f = get_finding(scc_name, gcp_org_id, credentials)
+        if "security_marks" in f.finding:
+            return dict(f.finding.security_marks.marks)
+    elif scc_name.startswith("//"):
+        logging.debug(f'Assuming type "asset" from scc_name format: {scc_name}')
+        a = get_asset(scc_name, gcp_org_id, credentials)
+        if "security_marks" in a:
+            return dict(a.security_marks.marks)
+    else:
+        raise TypeError(f"Unrecognized scc_name type: {scc_name}")
+    return {}
 
 
 def parse_notification(notification, ignore_unknown_fields=False):
@@ -337,7 +382,7 @@ def set_finding_state(finding_name, state="INACTIVE", credentials=None):
     return
 
 
-def set_security_mark(scc_name, marks, credentials=None):
+def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None):
     """Sets security marks on an asset or finding in SCC. Usually, if we're setting
     them on a finding, it means we're setting a mark of ``reason`` for setting it to inactive.
     if we're setting them on an asset, it is usually to ``allow_{finding.category}=true`` .
@@ -353,9 +398,9 @@ def set_security_mark(scc_name, marks, credentials=None):
         )
 
     :type scc_name: :py:class:`str`
-    :param scc_name: may be either an SCC ``asset.name`` or ``finding.name`` . format is:
-        ``organizations/123123/assets/123123`` or ``organizations/123123/sources/123123/findings/123123`` .
-        **note this does not accept ``resource.name`` format! (yet!)**
+    :param scc_name: may be either an SCC ``finding.name`` or a GCP ``resourceName`` . format is:
+        ``organizations/123123/sources/123123/findings/123123`` or ``//storage.googleapis.com/my-bucket``.
+        **note this does not accept ``asset.name`` format!**
 
     :type marks: :py:class:`dict`
     :param marks: a dictionary of marks to set on the asset or finding. format it:
@@ -372,6 +417,15 @@ def set_security_mark(scc_name, marks, credentials=None):
         raise TypeError(
             f"Argument: 'marks' must be a dict! You passed a {type(marks).__name__}."
         )
+    if scc_name.startswith("//"):
+        logging.debug(f'Assuming type "asset" from scc_name format: {scc_name}')
+        if not gcp_org_id:
+            raise TypeError(
+                f"When setting security marks on an asset, a `gcp_org_id` must be supplied."
+            )
+        a = get_asset(scc_name, gcp_org_id, credentials)
+        scc_name = a.name
+
     mask_paths = [f"marks.{k}" for k in marks.keys()]
 
     client = securitycenter.SecurityCenterClient(credentials=credentials)
