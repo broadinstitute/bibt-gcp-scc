@@ -187,7 +187,7 @@ def get_value(obj, path):
         attr = attr[:-2]
         grab_one = True
     elif attr.endswith("[0]"):
-        attr = attr[:-2]
+        attr = attr[:-3]
         grab_one = True
     elif attr.endswith("[*]"):
         attr = attr[:-3]
