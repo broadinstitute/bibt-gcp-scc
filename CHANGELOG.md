@@ -2,6 +2,12 @@
 
 [PyPI History](https://pypi.org/project/bibt-gcp-scc/#history)
 
+## 0.6.2 (2022-08-09)
+
+### Features
+
+* added support for "order_by" argument in `get_all_findings()` and `get_all_assets()`. See here for details on valid values: https://googleapis.dev/python/securitycenter/latest/securitycenter_v1/types.html#google.cloud.securitycenter_v1.types.ListAssetsRequest.order_by
+
 ## 0.6.0 (2022-08-01)
 
 ### Features

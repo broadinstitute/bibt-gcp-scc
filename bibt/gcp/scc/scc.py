@@ -21,7 +21,7 @@ from inflection import underscore
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 
-def get_all_assets(filter, gcp_org_id, page_size=1000, credentials=None):
+def get_all_assets(filter, gcp_org_id, order_by=None, page_size=1000, credentials=None):
     """Returns all assets matching a particular filter.
 
     .. code:: python
@@ -35,8 +35,13 @@ def get_all_assets(filter, gcp_org_id, page_size=1000, credentials=None):
 
     :type filter: :py:class:`str`
     :param filter: the filter to use. See
-        `here <https://cloud.google.com/security-command-center/docs/reference/rest/v1p1beta1/organizations.assets/list#query-parameters>`__
+        `here <https://googleapis.dev/python/securitycenter/latest/securitycenter_v1/types.html#google.cloud.securitycenter_v1.types.ListAssetsRequest.filter>`__
         for more on valid filter syntax.
+
+    :type order_by: :py:class:`str`
+    :param order_by: the sort order of the assets. See
+        `here <https://googleapis.dev/python/securitycenter/latest/securitycenter_v1/types.html#google.cloud.securitycenter_v1.types.ListAssetsRequest.order_by>`__
+        for more on valid arguments. Default is None.
 
     :type gcp_org_id: :py:class:`str`
     :param gcp_org_id: the GCP organization ID under which to search.
@@ -55,13 +60,16 @@ def get_all_assets(filter, gcp_org_id, page_size=1000, credentials=None):
         request={
             "parent": f"organizations/{gcp_org_id}",
             "filter": filter,
+            "order_by": order_by,
             "page_size": page_size,
         },
         credentials=credentials,
     )
 
 
-def get_all_findings(filter, gcp_org_id, page_size=1000, credentials=None):
+def get_all_findings(
+    filter, gcp_org_id, order_by=None, page_size=1000, credentials=None
+):
     """Returns an iterator for all findings matching a particular filter.
 
     .. code:: python
@@ -69,14 +77,20 @@ def get_all_findings(filter, gcp_org_id, page_size=1000, credentials=None):
         from bibt.gcp.scc import get_all_findings
         for _ in get_all_findings(
             filter='category="PUBLIC_BUCKET_ACL"',
+            order_by='eventTime desc',
             gcp_org_id=123123
         ):
             print(_.finding.name, _.resource.name)
 
     :type filter: :py:class:`str`
     :param filter: the filter to use. See
-        `here <https://cloud.google.com/security-command-center/docs/reference/rest/v1p1beta1/organizations.sources.findings/list#query-parameters>`__
+        `here <https://googleapis.dev/python/securitycenter/latest/securitycenter_v1/types.html#google.cloud.securitycenter_v1.types.ListFindingsRequest.filter>`__
         for more on valid filter syntax.
+
+    :type order_by: :py:class:`str`
+    :param order_by: the sort order of the findings. See
+        `here <https://googleapis.dev/python/securitycenter/latest/securitycenter_v1/types.html#google.cloud.securitycenter_v1.types.ListFindingsRequest.order_by>`__
+        for more on valid arguments. Default is None.
 
     :type gcp_org_id: :py:class:`str`
     :param gcp_org_id: the GCP organization ID under which to search.
@@ -96,6 +110,7 @@ def get_all_findings(filter, gcp_org_id, page_size=1000, credentials=None):
             "parent": f"organizations/{gcp_org_id}/sources/-",
             "filter": filter,
             "page_size": page_size,
+            "order_by": order_by,
         },
         credentials=credentials,
     )
@@ -147,7 +162,7 @@ def get_asset(resource_name, gcp_org_id, credentials=None):
         )
 
 
-def get_value(obj, path):
+def get_value(obj, path, raise_exception=True):
     """Fetches the value in the given ``obj`` according to the given ``path``. Works on objects and dicts.
     Supports arrays in a few ways:
         - if the ``path`` is ``resource.folders[].resource_folder_display_name`` OR
@@ -175,6 +190,10 @@ def get_value(obj, path):
     :type path: :py:class:`str`
     :param path: the path to follow to find the desired value(s).
 
+    :type raise_exception: :py:class:`bool`
+    :param raise_exception: whether it should raise an exception if the path isn't
+        resolved successfully, or just return None.
+
     :returns: whatever it finds at the end of the specified ``path``.
 
     :raises KeyError: if the next part of the path cannot be found.
@@ -192,12 +211,16 @@ def get_value(obj, path):
     elif attr.endswith("[*]"):
         attr = attr[:-3]
         grab_all = True
-    obj = _get(obj, attr)
+    obj = _get(obj, attr, raise_exception=raise_exception)
+    if not obj:
+        return None
     if grab_one:
         obj = obj[0]
     elif grab_all:
-        return [get_value(_obj, remaining) for _obj in obj]
-    return get_value(obj, remaining)
+        return [
+            get_value(_obj, remaining, raise_exception=raise_exception) for _obj in obj
+        ]
+    return get_value(obj, remaining, raise_exception=raise_exception)
 
 
 def get_finding(name, gcp_org_id, credentials=None):
@@ -458,7 +481,7 @@ def _get_all_assets_iter(request, credentials=None):
     return client.list_assets(request)
 
 
-def _get(obj, attr):
+def _get(obj, attr, raise_exception):
     """A helper function to get attributes. Works with objects as well as dictionaries.
     Will attempt in this order: 1) exactly what was passed (obj.my_attr) 2) underscored (obj.my_attr) 3) camelized (obj.myAttr) 4) key (obj[attr])
 
@@ -480,6 +503,12 @@ def _get(obj, attr):
     try:
         return obj.get(attr)
     except (KeyError, AttributeError):
-        raise KeyError(
-            f"Could not find attribute value [{attr}] in object of type: {type(obj).__name__}"
-        )
+        if raise_exception:
+            raise KeyError(
+                f"Could not find attribute value [{attr}] in object of type: {type(obj).__name__}"
+            )
+        else:
+            logging.error(
+                f"Could not find attribute value [{attr}] in object of type: {type(obj).__name__}; returning None."
+            )
+            return None
