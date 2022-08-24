@@ -1,3 +1,4 @@
+from bibt.gcp.scc.classes import FindingInfo
 from bibt.gcp.scc.scc import get_all_assets
 from bibt.gcp.scc.scc import get_all_findings
 from bibt.gcp.scc.scc import get_asset
@@ -20,4 +21,5 @@ __all__ = (
     "parse_notification",
     "set_finding_state",
     "set_security_marks",
+    "FindingInfo",
 )

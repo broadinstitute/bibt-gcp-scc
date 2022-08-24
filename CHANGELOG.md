@@ -2,6 +2,13 @@
 
 [PyPI History](https://pypi.org/project/bibt-gcp-scc/#history)
 
+## 0.6.3 (2022-08-24)
+
+### Features
+
+* **New function:** `get_sources()` will return a list of all SCC sources under the provided parent (parent in the form of `organizations/123456`, for example).
+* **New classes:** `FindingInfo` extracts some characteristics of interest from findings and is category-agnostic. `FindingParentInfo` is used by `FindingInfo` to gather information about the concerned resource's parent project/folder/organization.
+
 ## 0.6.2 (2022-08-09)
 
 ### Features
