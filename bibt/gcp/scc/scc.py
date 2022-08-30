@@ -483,7 +483,7 @@ def set_mute_status(finding_name, status="MUTED", credentials=None):
         mute_enum = Finding.Mute[status]
     else:
         raise KeyError(
-            f"Supplied state ({status}) not recognized. Must be one of ['MUTED','UNMUTED']"
+            f"Supplied status ({status}) not recognized. Must be one of ['MUTED','UNMUTED']"
         )
 
     client.set_mute(request={"name": finding_name, "mute": mute_enum})
