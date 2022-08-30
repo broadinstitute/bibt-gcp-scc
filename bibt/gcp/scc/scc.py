@@ -8,6 +8,7 @@ See the official Security Center Python Client documentation here: `link <https:
 
 """
 import logging
+import pytz
 from datetime import datetime
 from typing import Type
 
@@ -403,7 +404,7 @@ def set_finding_state(finding_name, state="INACTIVE", credentials=None):
         request={
             "name": finding_name,
             "state": state_enum,
-            "start_time": datetime.now(),
+            "start_time": datetime.now(pytz.UTC),
         }
     )
     return
@@ -456,6 +457,37 @@ def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None):
             "update_mask": field_mask_pb2.FieldMask(paths=mask_paths),
         }
     )
+    return
+
+
+def set_mute_status(finding_name, status="MUTED", credentials=None):
+    """This method will mute the finding by default. May also be used to unmute with
+    ``status="UNMUTED"`` .
+    .. code:: python
+        from bibt.gcp import scc
+        scc.set_mute_status(
+            finding_name="organizations/123123/sources/123123/findings/123123"
+        )
+    :type finding_name: :py:class:`str`
+    :param finding_name: the finding.name whose state to modify.
+    :type status: :py:class:`str`
+    :param status: whether the finding should be muted or unmuted. must be a valid value of
+        ``MUTED`` or ``UNMUTED`` . defaults to ``MUTED`` .
+    :type credentials: :py:class:`google_auth:google.oauth2.credentials.Credentials`
+    :param credentials: the credentials object to use when making the API call, if not to
+        use the account running the function for authentication.
+    :raises KeyError: if the argument supplied for ``status`` is not ``MUTED`` or ``UNMUTED`` .
+    """
+    client = securitycenter.SecurityCenterClient(credentials=credentials)
+
+    if status in ["MUTED", "UNMUTED"]:
+        mute_enum = Finding.Mute[status]
+    else:
+        raise KeyError(
+            f"Supplied status ({status}) not recognized. Must be one of ['MUTED','UNMUTED']"
+        )
+
+    client.set_mute(request={"name": finding_name, "mute": mute_enum})
     return
 
 
