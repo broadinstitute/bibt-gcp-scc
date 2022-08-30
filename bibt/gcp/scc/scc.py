@@ -8,6 +8,7 @@ See the official Security Center Python Client documentation here: `link <https:
 
 """
 import logging
+import pytz
 from datetime import datetime
 from typing import Type
 
@@ -403,7 +404,7 @@ def set_finding_state(finding_name, state="INACTIVE", credentials=None):
         request={
             "name": finding_name,
             "state": state_enum,
-            "start_time": datetime.now(),
+            "start_time": datetime.now(pytz.UTC),
         }
     )
     return
