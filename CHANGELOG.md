@@ -2,6 +2,13 @@
 
 [PyPI History](https://pypi.org/project/bibt-gcp-scc/#history)
 
+## 0.6.4 (2022-08-30)
+
+### Features
+
+* **New function:** `set_mute_status()` brings the functionality to MUTE or UNMUTE a finding in SCC.
+* Fixes to docstrings so that readthedocs builds it correctly.
+
 ## 0.6.3 (2022-08-24)
 
 ### Features

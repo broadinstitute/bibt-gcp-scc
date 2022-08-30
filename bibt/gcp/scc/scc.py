@@ -8,10 +8,10 @@ See the official Security Center Python Client documentation here: `link <https:
 
 """
 import logging
-import pytz
 from datetime import datetime
 from typing import Type
 
+import pytz
 from google.cloud import securitycenter
 from google.cloud.securitycenter_v1 import Finding
 from google.protobuf import field_mask_pb2
@@ -167,15 +167,21 @@ def get_asset(resource_name, gcp_org_id, credentials=None):
 def get_value(obj, path, raise_exception=True):
     """Fetches the value in the given ``obj`` according to the given ``path``. Works on objects and dicts.
     Supports arrays in a few ways:
-        - if the ``path`` is ``resource.folders[].resource_folder_display_name`` OR
-            ``resource.folders[0].resource_folder_display_name`` , it will just consider the
-            first element in the array.
-        - if the ``path`` is ``resource.folders[*].resource_folder_display_name`` ,
-            it will return a list of ``resource_folder_display_name`` values, one for each folder.
+
+    * if the ``path`` is ``resource.folders[].resource_folder_display_name`` OR
+      ``resource.folders[0].resource_folder_display_name``,
+      it will just consider the first element in the array.
+
+    * if the ``path`` is ``resource.folders[*].resource_folder_display_name``,
+      it will return a list of ``resource_folder_display_name`` values,
+      one for each folder.
+
     Additionally, if unsuccessful with exactly what was passed as ``path``, it will convert and try
-        both camelized and underscored attribute names (``resource_folder_display_name`` and ``resourceFolderDisplayName``).
-        As a last resort it will try a key lookup (e.g. ``obj[key]``).
+    both camelized and underscored attribute names (``resource_folder_display_name`` and ``resourceFolderDisplayName``).
+    As a last resort it will try a key lookup (e.g. ``obj[key]``).
+
     .. code:: python
+
         from bibt.gcp import scc
         f = scc.get_finding(name="organizations/123123/sources/123123/findings/123123", gcp_org_id=123123)
         v = scc.get_value(
@@ -183,14 +189,19 @@ def get_value(obj, path, raise_exception=True):
             "finding.source_properties.abuse_target_ips"
         )
         print(v)
+
     :type obj: :py:class:`object`
     :param obj: the object from which to extract a value.
+
     :type path: :py:class:`str`
     :param path: the path to follow to find the desired value(s).
+
     :type raise_exception: :py:class:`bool`
     :param raise_exception: whether it should raise an exception if the path isn't
         resolved successfully, or just return None.
+
     :returns: whatever it finds at the end of the specified ``path``.
+
     :raises KeyError: if the next part of the path cannot be found.
     """
     if path == "":
@@ -312,8 +323,8 @@ def get_sources(parent_name, credentials=None):
 
     .. code:: python
 
-    for source in get_sources("organizations/123456"):
-        print(source.display_name)
+        for source in get_sources("organizations/123456"):
+            print(source.display_name)
 
     :type parent_name: :py:class:`str`
     :param parent_name: the parent name, e.g. "organizations/123456" or "projects/123456"
@@ -322,7 +333,7 @@ def get_sources(parent_name, credentials=None):
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
 
-    :rtype: :py:class:`list` <:py:class:`gcp_scc:google.cloud.securitycenter_v1.types.Sources`>
+    :rtype: :py:class:`list` :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.Sources`
     :returns: a list of SCC Source objects
     """
     client = securitycenter.SecurityCenterClient(credentials=credentials)
@@ -332,21 +343,27 @@ def get_sources(parent_name, credentials=None):
 def parse_notification(notification, ignore_unknown_fields=False):
     """This method takes the notification received from a SCC Notification Pubsub
     and returns a Python object.
+
     .. code:: python
+
         import base64
         from bibt.gcp import scc
         def main(event, context):
             raw_notification = base64.b64decode(event["data"]).decode("utf-8")
             notification = scc.parse_notification(raw_notification)
             print(notification.finding.name, notification.finding.category, notification.resource.name)
+
     :type notification: :py:class:`str` OR :py:class:`dict`
     :param notification: the notification to parse. may be either a dictionary or a json string.
+
     :type ignore_unknown_fields: :py:class:`bool`
     :param ignore_unknown_fields: whether or not unrecognized fields should be ignored when parsing.
         fields may be unrecognized if they are added to the finding category in later releases of
         google-cloud-securitycenter library.
+
     :rtype: :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.ListFindingsResponse.ListFindingsResult`
     :returns: the finding notification as a Python object.
+
     :raises TypeError: if it is passed anything aside from a :py:class:`str` or :py:class:`dict`, or
         it has an issue parsing the finding into an object.
     """
@@ -375,20 +392,26 @@ def parse_notification(notification, ignore_unknown_fields=False):
 
 def set_finding_state(finding_name, state="INACTIVE", credentials=None):
     """This method will set the finding to inactive state by default.
+
     .. code:: python
+
         from bibt.gcp import scc
         scc.set_finding_state(
             finding_name="organizations/123123/sources/123123/findings/123123"
         )
+
     :type finding_name: :py:class:`str`
     :param finding_name: the finding.name whose state to modify.
+
     :type state: :py:class:`str`
     :param state: the state to set the finding to. must be valid according to
         :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.Finding.State`.
         defaults to "INACTIVE".
+
     :type credentials: :py:class:`google_auth:google.oauth2.credentials.Credentials`
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
+
     :raises KeyError: if the argument supplied for ``state`` is not a valid name
         for :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.Finding.State`.
     """
@@ -414,7 +437,9 @@ def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None):
     """Sets security marks on an asset or finding in SCC. Usually, if we're setting
     them on a finding, it means we're setting a mark of ``reason`` for setting it to inactive.
     if we're setting them on an asset, it is usually to ``allow_{finding.category}=true`` .
+
     .. code:: python
+
         from bibt.gcp import scc
         scc.set_security_mark(
             scc_name="organizations/123123/sources/123123/findings/123123",
@@ -422,17 +447,21 @@ def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None):
                 'reason': 'intentionally public'
             }
         )
+
     :type scc_name: :py:class:`str`
     :param scc_name: may be either an SCC ``finding.name`` or a GCP ``resourceName`` . format is:
         ``organizations/123123/sources/123123/findings/123123`` or ``//storage.googleapis.com/my-bucket``.
         **note this does not accept ``asset.name`` format!**
+
     :type marks: :py:class:`dict`
     :param marks: a dictionary of marks to set on the asset or finding. format it:
         ``marks={"allow_public_bucket_acl": "true", "reason": "intentional"}`` . **note this must be a dict
         and not a list!**
+
     :type credentials: :py:class:`google_auth:google.oauth2.credentials.Credentials`
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
+
     :raises TypeError: if the argument supplied for ``marks`` is not a :py:class:`dict`
     """
     if not isinstance(marks, dict):
@@ -463,19 +492,25 @@ def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None):
 def set_mute_status(finding_name, status="MUTED", credentials=None):
     """This method will mute the finding by default. May also be used to unmute with
     ``status="UNMUTED"`` .
+
     .. code:: python
+
         from bibt.gcp import scc
         scc.set_mute_status(
             finding_name="organizations/123123/sources/123123/findings/123123"
         )
+
     :type finding_name: :py:class:`str`
     :param finding_name: the finding.name whose state to modify.
+
     :type status: :py:class:`str`
     :param status: whether the finding should be muted or unmuted. must be a valid value of
         ``MUTED`` or ``UNMUTED`` . defaults to ``MUTED`` .
+
     :type credentials: :py:class:`google_auth:google.oauth2.credentials.Credentials`
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
+
     :raises KeyError: if the argument supplied for ``status`` is not ``MUTED`` or ``UNMUTED`` .
     """
     client = securitycenter.SecurityCenterClient(credentials=credentials)
@@ -494,6 +529,7 @@ def set_mute_status(finding_name, status="MUTED", credentials=None):
 def _get_all_findings_iter(request, credentials=None):
     """A helper method to make a list_findings API call. Expects a valid ``request``
     dictionary and can optionally be supplied with a credentials object.
+
     Returns: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.pagers.ListFindingsPager`
     """
     client = securitycenter.SecurityCenterClient(credentials=credentials)
@@ -503,6 +539,7 @@ def _get_all_findings_iter(request, credentials=None):
 def _get_all_assets_iter(request, credentials=None):
     """A helper method to make a list_assets API call. Expects a valid ``request``
     dictionary and can optionally be supplied with a credentials object.
+
     Returns: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.pagers.ListAssetsPager`
     """
     client = securitycenter.SecurityCenterClient(credentials=credentials)
@@ -512,6 +549,7 @@ def _get_all_assets_iter(request, credentials=None):
 def _get(obj, attr, raise_exception):
     """A helper function to get attributes. Works with objects as well as dictionaries.
     Will attempt in this order: 1) exactly what was passed (obj.my_attr) 2) underscored (obj.my_attr) 3) camelized (obj.myAttr) 4) key (obj[attr])
+
     Returns: whatever the value of the attribute is.
     Raises: KeyError if the key could not be found in the object.
     """
