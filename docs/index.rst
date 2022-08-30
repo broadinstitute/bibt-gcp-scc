@@ -36,7 +36,7 @@ bibt-gcp-scc: BITS Blue Team Utilities: GCP Security Command Center Module
 
 .. |top_lang| image:: https://img.shields.io/github/languages/top/broadinstitute/bibt-gcp-scc
 
-.. |status| image:: https://img.shields.io/badge/status-pre--alpha-red
+.. |status| image:: https://img.shields.io/badge/status-beta-orange
 
 .. |deps| image:: https://requires.io/github/broadinstitute/bibt-gcp-scc/requirements.svg?branch=main
      :target: https://requires.io/github/broadinstitute/bibt-gcp-scc/requirements/?branch=main

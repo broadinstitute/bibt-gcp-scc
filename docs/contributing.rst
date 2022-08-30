@@ -66,7 +66,7 @@ Updating and publishing a new package
    $ git add .
    $ git commit -m "fixes issue-1"
    $ git push --set-upstream origin issue-1
-   # ...open PR...
+   # ...open PR to main branch...
    # ...PR merged, issue closed automatically...
    $ git checkout main
    $ git pull
@@ -76,10 +76,11 @@ Updating and publishing a new package
 
    $ git add .
    $ git commit -m "msg"
-   $ bumpversion major|minor|patch # with bump2version, bumpversion is an alias
    # and to update main branch
    $ git push
    # to trigger a package & release
+   # make sure you're in the root directory of the repo before running bumpversion
+   $ bumpversion major|minor|patch # with bump2version, bumpversion is an alias
    $ git push --tags
 
 Getting Comfortable: Tutorials and Resources
