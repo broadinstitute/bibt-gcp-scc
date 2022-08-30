@@ -292,12 +292,14 @@ def get_security_marks(scc_name, gcp_org_id, credentials=None):
     :raises TypeError: if scc_name is not in a recognizeable format.
     """
     if "/findings/" in scc_name:
-        logging.debug(f'Assuming type "finding" from scc_name format: {scc_name}')
+        logging.debug(
+            f'Assuming type "finding" from scc_name format: {scc_name}')
         f = get_finding(scc_name, gcp_org_id, credentials)
         if "security_marks" in f.finding:
             return dict(f.finding.security_marks.marks)
     elif scc_name.startswith("//"):
-        logging.debug(f'Assuming type "asset" from scc_name format: {scc_name}')
+        logging.debug(
+            f'Assuming type "asset" from scc_name format: {scc_name}')
         a = get_asset(scc_name, gcp_org_id, credentials)
         if "security_marks" in a:
             return dict(a.security_marks.marks)
@@ -439,7 +441,8 @@ def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None):
             f"Argument: 'marks' must be a dict! You passed a {type(marks).__name__}."
         )
     if scc_name.startswith("//"):
-        logging.debug(f'Assuming type "asset" from scc_name format: {scc_name}')
+        logging.debug(
+            f'Assuming type "asset" from scc_name format: {scc_name}')
         if not gcp_org_id:
             raise TypeError(
                 f"When setting security marks on an asset, a `gcp_org_id` must be supplied."
@@ -457,6 +460,47 @@ def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None):
         }
     )
     return
+
+
+def set_finding_to_mute(finding_name, mute, credentials=None):
+    """This functions sets finding to be muted or unmuted
+
+    Args:
+        finding_name (_type_): _description_
+        mute (_type_): _description_
+        credentials (_type_, optional): _description_. Defaults to None.
+
+    Returns:
+        _type_: Boolean True if action is complete, False if action is not complete
+    """
+
+    # Call the API to mute the finding.
+    client = securitycenter.SecurityCenterClient(credentials=credentials)
+
+    # Defining request body
+    request = securitycenter.SetMuteRequest()
+    request.name = finding_name
+
+    # Defining mute state
+    if mute == True:
+        request.mute = securitycenter.Finding.Mute.MUTED
+    elif mute == False:
+        request.mute = securitycenter.Finding.Mute.UNMUTED
+    else:
+        raise ValueError("Mute variable undefined. Mute takes in the value of True or False ")
+
+    try:
+        finding = client.set_mute(request)
+        logging.info(f"Mute value for the finding: {finding.mute.name}")
+        return True
+
+    except ParseError as e:
+        # Catching the permissionDenied exception raised when muting an finding
+        logging.error(
+            f"Exception caught while setting finding to {mute}: [{type(e).__name__}: {e}] "
+            "(Check to make sure the triggering finding has not been deleted/resolved.)"
+        )
+        return False
 
 
 def _get_all_findings_iter(request, credentials=None):
