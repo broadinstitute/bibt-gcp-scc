@@ -59,7 +59,7 @@ class FindingInfo:
                     project_num = scc.get_value(
                         notification, "finding.sourceProperties.sourceId.projectNumber"
                     )
-                    return FindingParentInfo(
+                    return self._generate_parent_info(
                         f"//cloudresourcemanager.googleapis.com/projects/{project_num}",
                         gcp_org_id,
                     )
@@ -72,7 +72,7 @@ class FindingInfo:
                         notification,
                         "finding.sourceProperties.evidence[0].sourceLogId.resourceContainer",
                     )
-                    return FindingParentInfo(
+                    return self._generate_parent_info(
                         f"//cloudresourcemanager.googleapis.com/{res_container}",
                         gcp_org_id,
                     )
@@ -83,11 +83,18 @@ class FindingInfo:
         # If a non-ETD finding, try using resource.project_name
         if "resource" in notification and "project_name" in notification.resource:
             logging.debug(f"Using resource.project_name for finding parent info...")
-            return FindingParentInfo(notification.resource.project_name, gcp_org_id)
+            return self._generate_parent_info(
+                notification.resource.project_name, gcp_org_id
+            )
 
         # If all else fails, use finding.resource_name
         logging.debug(f"Using resource_name for finding parent info...")
-        return FindingParentInfo(notification.finding.resource_name, gcp_org_id)
+        return self._generate_parent_info(
+            notification.finding.resource_name, gcp_org_id
+        )
+
+    def _generate_parent_info(self, resource_name, gcp_org_id):
+        return FindingParentInfo(resource_name, gcp_org_id)
 
     def _get_asset_security_marks(self, resource_name, gcp_org_id):
         """If the resource name isn't an organization, try getting the resource's
@@ -167,29 +174,15 @@ class FindingParentInfo:
             a.security_center_properties.resource_type
             == "google.cloud.resourcemanager.Project"
         ):
-            id_num = a.resource_properties.get("projectNumber")
-            owners = list(a.security_center_properties.resource_owners)
+            id_num, owners = self._extract_parent_info_project(a)
         elif (
             a.security_center_properties.resource_type
             == "google.cloud.resourcemanager.Folder"
         ):
-            if "folderId" in a.resource_properties:
-                id_num = a.resource_properties.get("folderId")
-            else:
-                id_num = a.resource_properties.get("name").split("/")[1]
-            # Get folder owners from the IAM blob
-            iam_bindings = json.loads(a.iam_policy.policy_blob).get("bindings", None)
-            if iam_bindings:
-                for binding in iam_bindings:
-                    if binding["role"] in [
-                        "roles/resourcemanager.folderAdmin",
-                        "roles/owner",
-                    ]:
-                        owners.extend(binding["members"])
-                owners = list(set(owners))
+            id_num, owners = self._extract_parent_info_folder(a)
         else:
             # No owners will be extracted if it is an organization
-            id_num = a.resource_properties.get("organizationId")
+            id_num, owners = self._extract_parent_info_org(a)
 
         return (
             a.security_center_properties.resource_display_name,
@@ -198,6 +191,32 @@ class FindingParentInfo:
             id_num,
             owners,
         )
+
+    def _extract_parent_info_project(self, asset):
+        return (
+            asset.resource_properties.get("projectNumber"),
+            list(asset.security_center_properties.resource_owners),
+        )
+
+    def _extract_parent_info_folder(self, asset):
+        if "folderId" in asset.resource_properties:
+            id_num = asset.resource_properties.get("folderId")
+        else:
+            id_num = asset.resource_properties.get("name").split("/")[1]
+        # Get folder owners from the IAM blob
+        iam_bindings = json.loads(asset.iam_policy.policy_blob).get("bindings", None)
+        if iam_bindings:
+            for binding in iam_bindings:
+                if binding["role"] in [
+                    "roles/resourcemanager.folderAdmin",
+                    "roles/owner",
+                ]:
+                    owners.extend(binding["members"])
+            owners = list(set(owners))
+        return (id_num, owners)
+
+    def _extract_parent_info_org(self, asset):
+        return (asset.resource_properties.get("organizationId"), [])
 
     def package(self):
         """Converts this object into a dict."""
