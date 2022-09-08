@@ -2,6 +2,11 @@
 
 [PyPI History](https://pypi.org/project/bibt-gcp-scc/#history)
 
+## 0.6.11 (2022-09**-08)
+
+* **New class:** `Client` constructs a single SecurityCommandCenter client object and can be used to call the API without reauthenticating each time.
+* Support for passing clients to any relevant function.
+
 ## 0.6.4 (2022-08-30)
 
 ### Features

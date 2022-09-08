@@ -2,7 +2,43 @@ import json
 import logging
 import os
 
+from google.cloud import securitycenter
+
 from . import scc
+
+_LOGGER = logging.getLogger(__name__)
+
+
+class Client:
+    def __init__(self, credentials=None):
+        self._client = securitycenter.SecurityCenterClient(credentials=credentials)
+
+    def get_all_assets(self, **kwargs):
+        scc.get_all_assets(client=self._client, **kwargs)
+
+    def get_all_findings(self, **kwargs):
+        scc.get_all_findings(client=self._client, **kwargs)
+
+    def get_asset(self, **kwargs):
+        scc.get_asset(client=self._client, **kwargs)
+
+    def get_finding(self, **kwargs):
+        scc.get_finding(client=self._client, **kwargs)
+
+    def get_security_marks(self, **kwargs):
+        scc.get_security_marks(client=self._client, **kwargs)
+
+    def get_sources(self, **kwargs):
+        scc.get_sources(client=self._client, **kwargs)
+
+    def set_finding_state(self, **kwargs):
+        scc.set_finding_state(client=self._client, **kwargs)
+
+    def set_security_marks(self, **kwargs):
+        scc.set_security_marks(client=self._client, **kwargs)
+
+    def set_mute_status(self, **kwargs):
+        scc.set_mute_status(client=self._client, **kwargs)
 
 
 class FindingInfo:
@@ -12,7 +48,7 @@ class FindingInfo:
     """
 
     def __init__(self, notification, gcp_org_id):
-        logging.info(
+        _LOGGER.info(
             f"Creating FindingInfo object for finding: {notification.finding.name}"
         )
         self.name = notification.finding.name
@@ -55,7 +91,7 @@ class FindingInfo:
                 if "projectNumber" in notification.finding.source_properties.get(
                     "sourceId"
                 ):
-                    logging.debug(f"Using projectNumber for ETD finding parent info...")
+                    _LOGGER.debug(f"Using projectNumber for ETD finding parent info...")
                     project_num = scc.get_value(
                         notification, "finding.sourceProperties.sourceId.projectNumber"
                     )
@@ -65,7 +101,7 @@ class FindingInfo:
                     )
                 # Otherwise, use the resourceContainer of the audit log evidence.
                 else:
-                    logging.debug(
+                    _LOGGER.debug(
                         f"Using resourceContainer for ETD finding parent info..."
                     )
                     res_container = scc.get_value(
@@ -77,18 +113,18 @@ class FindingInfo:
                         gcp_org_id,
                     )
         except (ValueError, KeyError) as e:
-            logging.error(f"Error getting ETD parent info: {type(e).__name__}: {e}")
+            _LOGGER.error(f"Error getting ETD parent info: {type(e).__name__}: {e}")
             pass
 
         # If a non-ETD finding, try using resource.project_name
         if "resource" in notification and "project_name" in notification.resource:
-            logging.debug(f"Using resource.project_name for finding parent info...")
+            _LOGGER.debug(f"Using resource.project_name for finding parent info...")
             return self._generate_parent_info(
                 notification.resource.project_name, gcp_org_id
             )
 
         # If all else fails, use finding.resource_name
-        logging.debug(f"Using resource_name for finding parent info...")
+        _LOGGER.debug(f"Using resource_name for finding parent info...")
         return self._generate_parent_info(
             notification.finding.resource_name, gcp_org_id
         )
@@ -104,13 +140,13 @@ class FindingInfo:
             try:
                 return scc.get_security_marks(resource_name, gcp_org_id)
             except ValueError as e:
-                logging.error(
+                _LOGGER.error(
                     "Exception caught getting asset security marks, it "
                     f"may have been deleted: {type(e).__name__}: {e}"
                 )
                 pass
         else:
-            logging.info("Not getting security marks for organization.")
+            _LOGGER.info("Not getting security marks for organization.")
         return None
 
     def package(self):
@@ -137,7 +173,7 @@ class FindingParentInfo:
 
         See more: https://cloud.google.com/asset-inventory/docs/resource-name-format
         """
-        logging.info(f"Getting parent info for resource: {resource}")
+        _LOGGER.info(f"Getting parent info for resource: {resource}")
         try:
             (
                 self.displayName,
@@ -147,7 +183,7 @@ class FindingParentInfo:
                 self.owners,
             ) = self._get_parent_info(resource, gcp_org_id)
         except ValueError as e:
-            logging.error(
+            _LOGGER.error(
                 f"Error while extracting parent info: {type(e).__name__}: {e}"
             )
             raise e
@@ -157,16 +193,17 @@ class FindingParentInfo:
         resource parents until it hits a project, folder, or organization.
         Then grabs that asset's metadata to return relevant parent info.
         """
-        from bibt.gcp.scc import get_asset
 
         # Begin iterating through asset parents until we hit a project, folder, or organization
-        a = get_asset(resource, gcp_org_id)
+        a = self._get_asset(resource, gcp_org_id)
         while a.security_center_properties.resource_type not in [
             "google.cloud.resourcemanager.Project",
             "google.cloud.resourcemanager.Folder",
             "google.cloud.resourcemanager.Organization",
         ]:
-            a = get_asset(a.security_center_properties.resource_parent, gcp_org_id)
+            a = self._get_asset(
+                a.security_center_properties.resource_parent, gcp_org_id
+            )
 
         # Now we have a project, folder, or organization, get the relevant metadata and return
         owners = []
@@ -191,6 +228,9 @@ class FindingParentInfo:
             id_num,
             owners,
         )
+
+    def _get_asset(self, resource, gcp_org_id):
+        return scc.get_asset(resource, gcp_org_id)
 
     def _extract_parent_info_project(self, asset):
         return (

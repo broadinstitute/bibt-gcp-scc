@@ -20,8 +20,12 @@ from google.protobuf.json_format import ParseError
 from inflection import camelize
 from inflection import underscore
 
+_LOGGER = logging.getLogger(__name__)
 
-def get_all_assets(filter, gcp_org_id, order_by=None, page_size=1000, credentials=None):
+
+def get_all_assets(
+    filter, gcp_org_id, order_by=None, page_size=1000, credentials=None, client=None
+):
     """Returns all assets matching a particular filter.
 
     .. code:: python
@@ -64,11 +68,12 @@ def get_all_assets(filter, gcp_org_id, order_by=None, page_size=1000, credential
             "page_size": page_size,
         },
         credentials=credentials,
+        client=client,
     )
 
 
 def get_all_findings(
-    filter, gcp_org_id, order_by=None, page_size=1000, credentials=None
+    filter, gcp_org_id, order_by=None, page_size=1000, credentials=None, client=None
 ):
     """Returns an iterator for all findings matching a particular filter.
 
@@ -87,20 +92,22 @@ def get_all_findings(
         `here <https://googleapis.dev/python/securitycenter/latest/securitycenter_v1/types.html#google.cloud.securitycenter_v1.types.ListFindingsRequest.filter>`__
         for more on valid filter syntax.
 
-    :type order_by: :py:class:`str`
-    :param order_by: the sort order of the findings. See
-        `here <https://googleapis.dev/python/securitycenter/latest/securitycenter_v1/types.html#google.cloud.securitycenter_v1.types.ListFindingsRequest.order_by>`__
-        for more on valid arguments. Default is None.
-
     :type gcp_org_id: :py:class:`str`
     :param gcp_org_id: the GCP organization ID under which to search.
 
+    :type order_by: :py:class:`str`
+    :param order_by: (optional) the sort order of the findings. See
+        `here <https://googleapis.dev/python/securitycenter/latest/securitycenter_v1/types.html#google.cloud.securitycenter_v1.types.ListFindingsRequest.order_by>`__
+        for more on valid arguments. Default is None.
     :type page_size: :py:class:`int`
-    :param page_size: the page size for the API requests. max and default is ``1000`` .
+    :param page_size: (optional) the page size for the API requests. max and default is ``1000`` .
 
     :type credentials: :py:class:`google_auth:google.oauth2.credentials.Credentials`
-    :param credentials: the credentials object to use when making the API call, if not to
+    :param credentials: (optional) the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
+
+    :type client: :py:class:`gcp_scc:google.cloud.securitycenter.SecurityCenterClient`
+    :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
 
     :rtype: :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.ListFindingsResponse`
     :returns: an iterator for all findings matching the filter.
@@ -113,10 +120,11 @@ def get_all_findings(
             "order_by": order_by,
         },
         credentials=credentials,
+        client=client,
     )
 
 
-def get_asset(resource_name, gcp_org_id, credentials=None):
+def get_asset(resource_name, gcp_org_id, credentials=None, client=None):
     """This function returns the asset object specified by name.
 
     .. code:: python
@@ -138,6 +146,9 @@ def get_asset(resource_name, gcp_org_id, credentials=None):
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
 
+    :type client: :py:class:`gcp_scc:google.cloud.securitycenter.SecurityCenterClient`
+    :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
+
     :rtype: :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.Asset`
     :returns: the specified asset object.
 
@@ -150,6 +161,7 @@ def get_asset(resource_name, gcp_org_id, credentials=None):
             "page_size": 1,
         },
         credentials=credentials,
+        client=client,
     )
     try:
         _, a = next(enumerate(assets))
@@ -227,7 +239,7 @@ def get_value(obj, path, raise_exception=True):
     return get_value(obj, remaining, raise_exception=raise_exception)
 
 
-def get_finding(name, gcp_org_id, credentials=None):
+def get_finding(name, gcp_org_id, credentials=None, client=None):
     """This function returns the finding object specified by name.
 
     .. code:: python
@@ -249,6 +261,9 @@ def get_finding(name, gcp_org_id, credentials=None):
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
 
+    :type client: :py:class:`gcp_scc:google.cloud.securitycenter.SecurityCenterClient`
+    :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
+
     :rtype: :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.ListFindingsResponse.ListFindingsResult`
     :returns: the specified finding object, paired with its resource information.
 
@@ -261,6 +276,7 @@ def get_finding(name, gcp_org_id, credentials=None):
             "page_size": 1,
         },
         credentials=credentials,
+        client=client,
     )
     try:
         _, f = next(enumerate(findings))
@@ -272,7 +288,7 @@ def get_finding(name, gcp_org_id, credentials=None):
         )
 
 
-def get_security_marks(scc_name, gcp_org_id, credentials=None):
+def get_security_marks(scc_name, gcp_org_id, credentials=None, client=None):
     """Gets security marks on an asset or finding in SCC and returns them as a dict.
 
     .. code:: python
@@ -296,19 +312,22 @@ def get_security_marks(scc_name, gcp_org_id, credentials=None):
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
 
+    :type client: :py:class:`gcp_scc:google.cloud.securitycenter.SecurityCenterClient`
+    :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
+
     :rtype: :py:class:`dict`
     :returns: a dictionary containing security marks as key/value pairs.
 
     :raises TypeError: if scc_name is not in a recognizeable format.
     """
     if "/findings/" in scc_name:
-        logging.debug(f'Assuming type "finding" from scc_name format: {scc_name}')
-        f = get_finding(scc_name, gcp_org_id, credentials)
+        _LOGGER.debug(f'Assuming type "finding" from scc_name format: {scc_name}')
+        f = get_finding(scc_name, gcp_org_id, credentials, client)
         if "security_marks" in f.finding:
             return dict(f.finding.security_marks.marks)
     elif scc_name.startswith("//"):
-        logging.debug(f'Assuming type "asset" from scc_name format: {scc_name}')
-        a = get_asset(scc_name, gcp_org_id, credentials)
+        _LOGGER.debug(f'Assuming type "asset" from scc_name format: {scc_name}')
+        a = get_asset(scc_name, gcp_org_id, credentials, client)
         if "security_marks" in a:
             return dict(a.security_marks.marks)
     else:
@@ -316,7 +335,7 @@ def get_security_marks(scc_name, gcp_org_id, credentials=None):
     return {}
 
 
-def get_sources(parent_name, credentials=None):
+def get_sources(parent_name, credentials=None, client=None):
     """Returns a list of all sources in the parent.
 
     .. code:: python
@@ -331,10 +350,14 @@ def get_sources(parent_name, credentials=None):
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
 
+    :type client: :py:class:`gcp_scc:google.cloud.securitycenter.SecurityCenterClient`
+    :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
+
     :rtype: :py:class:`list` :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.Sources`
     :returns: a list of SCC Source objects
     """
-    client = securitycenter.SecurityCenterClient(credentials=credentials)
+    if not client:
+        client = securitycenter.SecurityCenterClient(credentials=credentials)
     return [source for source in client.list_sources(parent=parent_name)]
 
 
@@ -388,7 +411,7 @@ def parse_notification(notification, ignore_unknown_fields=False):
         )
 
 
-def set_finding_state(finding_name, state="INACTIVE", credentials=None):
+def set_finding_state(finding_name, state="INACTIVE", credentials=None, client=None):
     """This method will set the finding to inactive state by default.
 
     .. code:: python
@@ -410,6 +433,9 @@ def set_finding_state(finding_name, state="INACTIVE", credentials=None):
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
 
+    :type client: :py:class:`gcp_scc:google.cloud.securitycenter.SecurityCenterClient`
+    :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
+
     :raises KeyError: if the argument supplied for ``state`` is not a valid name
         for :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.Finding.State`.
     """
@@ -420,7 +446,8 @@ def set_finding_state(finding_name, state="INACTIVE", credentials=None):
             f"Supplied state ({state}) not recognized. Must be one of {[s.name for s in Finding.State]}"
         )
 
-    client = securitycenter.SecurityCenterClient(credentials=credentials)
+    if not client:
+        client = securitycenter.SecurityCenterClient(credentials=credentials)
     client.set_finding_state(
         request={
             "name": finding_name,
@@ -431,7 +458,7 @@ def set_finding_state(finding_name, state="INACTIVE", credentials=None):
     return
 
 
-def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None):
+def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None, client=None):
     """Sets security marks on an asset or finding in SCC. Usually, if we're setting
     them on a finding, it means we're setting a mark of ``reason`` for setting it to inactive.
     if we're setting them on an asset, it is usually to ``allow_{finding.category}=true`` .
@@ -460,6 +487,9 @@ def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None):
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
 
+    :type client: :py:class:`gcp_scc:google.cloud.securitycenter.SecurityCenterClient`
+    :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
+
     :raises TypeError: if the argument supplied for ``marks`` is not a :py:class:`dict`
     """
     if not isinstance(marks, dict):
@@ -467,7 +497,7 @@ def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None):
             f"Argument: 'marks' must be a dict! You passed a {type(marks).__name__}."
         )
     if scc_name.startswith("//"):
-        logging.debug(f'Assuming type "asset" from scc_name format: {scc_name}')
+        _LOGGER.debug(f'Assuming type "asset" from scc_name format: {scc_name}')
         if not gcp_org_id:
             raise TypeError(
                 f"When setting security marks on an asset, a `gcp_org_id` must be supplied."
@@ -477,7 +507,8 @@ def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None):
 
     mask_paths = [f"marks.{k}" for k in marks.keys()]
 
-    client = securitycenter.SecurityCenterClient(credentials=credentials)
+    if not client:
+        client = securitycenter.SecurityCenterClient(credentials=credentials)
     client.update_security_marks(
         request={
             "security_marks": {"name": f"{scc_name}/securityMarks", "marks": marks},
@@ -487,7 +518,7 @@ def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None):
     return
 
 
-def set_mute_status(finding_name, status="MUTED", credentials=None):
+def set_mute_status(finding_name, status="MUTED", credentials=None, client=None):
     """This method will mute the finding by default. May also be used to unmute with
     ``status="UNMUTED"`` .
 
@@ -509,9 +540,13 @@ def set_mute_status(finding_name, status="MUTED", credentials=None):
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
 
+    :type client: :py:class:`gcp_scc:google.cloud.securitycenter.SecurityCenterClient`
+    :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
+
     :raises KeyError: if the argument supplied for ``status`` is not ``MUTED`` or ``UNMUTED`` .
     """
-    client = securitycenter.SecurityCenterClient(credentials=credentials)
+    if not client:
+        client = securitycenter.SecurityCenterClient(credentials=credentials)
 
     if status in ["MUTED", "UNMUTED"]:
         mute_enum = Finding.Mute[status]
@@ -524,23 +559,25 @@ def set_mute_status(finding_name, status="MUTED", credentials=None):
     return
 
 
-def _get_all_findings_iter(request, credentials=None):
+def _get_all_findings_iter(request, credentials=None, client=None):
     """A helper method to make a list_findings API call. Expects a valid ``request``
     dictionary and can optionally be supplied with a credentials object.
 
     Returns: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.pagers.ListFindingsPager`
     """
-    client = securitycenter.SecurityCenterClient(credentials=credentials)
+    if not client:
+        client = securitycenter.SecurityCenterClient(credentials=credentials)
     return client.list_findings(request)
 
 
-def _get_all_assets_iter(request, credentials=None):
+def _get_all_assets_iter(request, credentials=None, client=None):
     """A helper method to make a list_assets API call. Expects a valid ``request``
     dictionary and can optionally be supplied with a credentials object.
 
     Returns: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.pagers.ListAssetsPager`
     """
-    client = securitycenter.SecurityCenterClient(credentials=credentials)
+    if not client:
+        client = securitycenter.SecurityCenterClient(credentials=credentials)
     return client.list_assets(request)
 
 
@@ -571,7 +608,7 @@ def _get(obj, attr, raise_exception):
                 f"Could not find attribute value [{attr}] in object of type: {type(obj).__name__}"
             )
         else:
-            logging.error(
+            _LOGGER.error(
                 f"Could not find attribute value [{attr}] in object of type: {type(obj).__name__}; returning None."
             )
             return None
