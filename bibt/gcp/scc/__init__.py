@@ -1,4 +1,5 @@
 from bibt.gcp.scc.classes import FindingInfo
+from bibt.gcp.scc.classes import FindingParentInfo
 from bibt.gcp.scc.scc import get_all_assets
 from bibt.gcp.scc.scc import get_all_findings
 from bibt.gcp.scc.scc import get_asset
@@ -26,4 +27,5 @@ __all__ = (
     "set_security_marks",
     "set_mute_status",
     "FindingInfo",
+    "FindingParentInfo",
 )
