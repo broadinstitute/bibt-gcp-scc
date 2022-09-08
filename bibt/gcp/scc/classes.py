@@ -39,7 +39,7 @@ class FindingInfo:
         sources = scc.get_sources(source_parent)
         for source in sources:
             if source.name == finding_source:
-                return source.display_name
+                return source
         return None
 
     def _get_parent_info(self, notification, gcp_org_id):
