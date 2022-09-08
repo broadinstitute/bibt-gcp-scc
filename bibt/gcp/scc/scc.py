@@ -20,8 +20,6 @@ from google.protobuf.json_format import ParseError
 from inflection import camelize
 from inflection import underscore
 
-logging.getLogger(__name__).addHandler(logging.NullHandler())
-
 
 def get_all_assets(filter, gcp_org_id, order_by=None, page_size=1000, credentials=None):
     """Returns all assets matching a particular filter.
