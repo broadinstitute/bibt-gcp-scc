@@ -1,5 +1,5 @@
 Security Command Center
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: bibt.gcp.scc.scc
+.. automodule:: bibt.gcp.scc
   :members:
