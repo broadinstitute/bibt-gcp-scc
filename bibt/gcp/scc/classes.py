@@ -163,6 +163,7 @@ class FindingInfo:
             "severity": self.severity,
             "event_time": self.eventTime.isoformat(),
             "create_time": self.createTime.isoformat(),
+            "resource_name": self.resourceName,
             "security_marks": self.securityMarks,
             "asset_security_marks": self.assetSecurityMarks,
             "parent_info": self.parentInfo.package() if self.parentInfo else None,
