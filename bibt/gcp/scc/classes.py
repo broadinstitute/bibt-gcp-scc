@@ -53,9 +53,12 @@ class FindingInfo:
         )
         self.name = notification.finding.name
         self.category = notification.finding.category
+        self.source = self._get_finding_source(notification.finding.parent)
         self.severity = notification.finding.severity.name
+        self.eventTime = notification.finding.event_time
+        self.createTime = notification.finding.create_time
         self.resourceName = notification.finding.resource_name
-        self.securityMarks = scc.get_security_marks(
+        self.securityMarks = self._get_finding_security_marks(
             notification.finding.name, gcp_org_id
         )
         self.assetSecurityMarks = self._get_asset_security_marks(
@@ -86,10 +89,7 @@ class FindingInfo:
         need special handling as they often just pass the organization as the finding's resource_name.
         """
         try:
-            if (
-                self._get_finding_source(notification.finding.parent)
-                == "Event Threat Detection"
-            ):
+            if self.source == "Event Threat Detection":
                 # Some ETD findings include a projectNumber. Use that if present.
                 if "projectNumber" in notification.finding.source_properties.get(
                     "sourceId"
@@ -135,6 +135,9 @@ class FindingInfo:
     def _generate_parent_info(self, resource_name, gcp_org_id):
         return FindingParentInfo(resource_name, gcp_org_id)
 
+    def _get_finding_security_marks(self, finding_name, gcp_org_id):
+        return scc.get_security_marks(finding_name, gcp_org_id)
+
     def _get_asset_security_marks(self, resource_name, gcp_org_id):
         """If the resource name isn't an organization, try getting the resource's
         security marks in SCC. If any errors are encountered, or it is an org, return None.
@@ -156,7 +159,10 @@ class FindingInfo:
         return {
             "name": self.name,
             "category": self.category,
+            "source": self.source,
             "severity": self.severity,
+            "event_time": self.eventTime,
+            "create_time": self.createTime,
             "security_marks": self.securityMarks,
             "asset_security_marks": self.assetSecurityMarks,
             "parent_info": self.parentInfo.package() if self.parentInfo else None,

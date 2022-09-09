@@ -2,7 +2,11 @@
 
 [PyPI History](https://pypi.org/project/bibt-gcp-scc/#history)
 
-## 0.6.11 (2022-09**-08)
+## 0.6.13 (2022-09-09)
+
+* Added `event_time`, `create_time`, and `source` attributes to the FindingInfo class.
+
+## 0.6.11 (2022-09-08)
 
 * **New class:** `Client` constructs a single SecurityCommandCenter client object and can be used to call the API without reauthenticating each time.
 * Support for passing clients to any relevant function.
