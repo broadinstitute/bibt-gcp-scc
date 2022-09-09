@@ -64,10 +64,13 @@ class FindingInfo:
         self.parentInfo = self._get_parent_info(notification, gcp_org_id)
 
         # Do a type check to confirm parentInfo is an instance of FindingParentInfo or None.
-        if not (isinstance(self.parentInfo, FindingParentInfo) or self.parentInfo):
+        if not (
+            isinstance(self.parentInfo, FindingParentInfo) or self.parentInfo == None
+        ):
             raise TypeError(
                 "FindingInfo.parentInfo must be an instance of "
-                "FindingParentInfo or a derived subclass (or None)."
+                "FindingParentInfo or a derived subclass (or None). "
+                f"You passed: {str(self.parentInfo.__class__.__mro__)}"
             )
 
     def _get_finding_source(self, finding_source):
@@ -206,7 +209,6 @@ class FindingParentInfo:
             )
 
         # Now we have a project, folder, or organization, get the relevant metadata and return
-        owners = []
         if (
             a.security_center_properties.resource_type
             == "google.cloud.resourcemanager.Project"
@@ -239,6 +241,7 @@ class FindingParentInfo:
         )
 
     def _extract_parent_info_folder(self, asset):
+        owners = []
         if "folderId" in asset.resource_properties:
             id_num = asset.resource_properties.get("folderId")
         else:
