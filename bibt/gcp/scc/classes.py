@@ -47,24 +47,38 @@ class FindingInfo:
     here, we can standardize how fields are passed around in functions and pipelines.
     """
 
-    def __init__(self, notification, gcp_org_id):
+    def __init__(self, notification, gcp_org_id, client=None):
         _LOGGER.info(
             f"Creating FindingInfo object for finding: {notification.finding.name}"
         )
+        if not (isinstance(client, Client) or client == None):
+            _LOGGER.error(
+                "The `client` parameter must be an instance of "
+                "bibt.gcp.scc.Client or a derived subclass (or None). "
+                f"You passed: {str(client.__class__.__mro__)}. Proceeding "
+                "without the use of the client."
+            )
+            client = None
+
+        self._client = client
         self.name = notification.finding.name
         self.category = notification.finding.category
-        self.source = self._get_finding_source(notification.finding.parent)
+        self.source = self._get_finding_source(
+            notification.finding.parent, client=self._client
+        )
         self.severity = notification.finding.severity.name
         self.eventTime = notification.finding.event_time
         self.createTime = notification.finding.create_time
         self.resourceName = notification.finding.resource_name
         self.securityMarks = self._get_finding_security_marks(
-            notification.finding.name, gcp_org_id
+            notification.finding.name, gcp_org_id, client=self._client
         )
         self.assetSecurityMarks = self._get_asset_security_marks(
-            notification.finding.resource_name, gcp_org_id
+            notification.finding.resource_name, gcp_org_id, client=self._client
         )
-        self.parentInfo = self._get_parent_info(notification, gcp_org_id)
+        self.parentInfo = self._get_parent_info(
+            notification, gcp_org_id, client=self._client
+        )
 
         # Do a type check to confirm parentInfo is an instance of FindingParentInfo or None.
         if not (
@@ -76,15 +90,15 @@ class FindingInfo:
                 f"You passed: {str(self.parentInfo.__class__.__mro__)}"
             )
 
-    def _get_finding_source(self, finding_source):
+    def _get_finding_source(self, finding_source, client=None):
         source_parent = "/".join(finding_source.split("/")[:2])
-        sources = scc.get_sources(source_parent)
+        sources = scc.get_sources(source_parent, client=client)
         for source in sources:
             if source.name == finding_source:
                 return source.display_name
         return None
 
-    def _get_parent_info(self, notification, gcp_org_id):
+    def _get_parent_info(self, notification, gcp_org_id, client=None):
         """Returns a FindingParentInfo with the relevant information. ETD sourced findings
         need special handling as they often just pass the organization as the finding's resource_name.
         """
@@ -101,6 +115,7 @@ class FindingInfo:
                     return self._generate_parent_info(
                         f"//cloudresourcemanager.googleapis.com/projects/{project_num}",
                         gcp_org_id,
+                        client=client,
                     )
                 # Otherwise, use the resourceContainer of the audit log evidence.
                 else:
@@ -114,6 +129,7 @@ class FindingInfo:
                     return self._generate_parent_info(
                         f"//cloudresourcemanager.googleapis.com/{res_container}",
                         gcp_org_id,
+                        client=client,
                     )
         except (ValueError, KeyError) as e:
             _LOGGER.error(f"Error getting ETD parent info: {type(e).__name__}: {e}")
@@ -123,27 +139,31 @@ class FindingInfo:
         if "resource" in notification and "project_name" in notification.resource:
             _LOGGER.debug(f"Using resource.project_name for finding parent info...")
             return self._generate_parent_info(
-                notification.resource.project_name, gcp_org_id
+                notification.resource.project_name, gcp_org_id, client=client
             )
 
         # If all else fails, use finding.resource_name
         _LOGGER.debug(f"Using resource_name for finding parent info...")
         return self._generate_parent_info(
-            notification.finding.resource_name, gcp_org_id
+            notification.finding.resource_name, gcp_org_id, client=client
         )
 
-    def _generate_parent_info(self, resource_name, gcp_org_id):
-        return FindingParentInfo(resource_name, gcp_org_id)
+    def _generate_parent_info(self, resource_name, gcp_org_id, client=None):
+        return FindingParentInfo(resource_name, gcp_org_id, client)
 
-    def _get_finding_security_marks(self, finding_name, gcp_org_id):
+    def _get_finding_security_marks(self, finding_name, gcp_org_id, client=None):
+        if client:
+            return client.get_security_marks(finding_name, gcp_org_id)
         return scc.get_security_marks(finding_name, gcp_org_id)
 
-    def _get_asset_security_marks(self, resource_name, gcp_org_id):
+    def _get_asset_security_marks(self, resource_name, gcp_org_id, client=None):
         """If the resource name isn't an organization, try getting the resource's
         security marks in SCC. If any errors are encountered, or it is an org, return None.
         """
         if not "/organizations/" in resource_name:
             try:
+                if client:
+                    return client.get_security_marks(resource_name, gcp_org_id)
                 return scc.get_security_marks(resource_name, gcp_org_id)
             except ValueError as e:
                 _LOGGER.error(
@@ -178,12 +198,22 @@ class FindingParentInfo:
     pass asset/parent information in a standardized way.
     """
 
-    def __init__(self, resource, gcp_org_id):
+    def __init__(self, resource, gcp_org_id, client=None):
         """Resource must be in the format: //compute.googleapis.com/projects/PROJECT_ID/zones/ZONE/instances/INSTANCE
 
         See more: https://cloud.google.com/asset-inventory/docs/resource-name-format
         """
         _LOGGER.info(f"Getting parent info for resource: {resource}")
+        if not (isinstance(client, Client) or client == None):
+            _LOGGER.error(
+                "The `client` parameter must be an instance of "
+                "bibt.gcp.scc.Client or a derived subclass (or None). "
+                f"You passed: {str(client.__class__.__mro__)}. Proceeding "
+                "without the use of the client."
+            )
+            client = None
+
+        self._client = client
         try:
             (
                 self.displayName,
@@ -191,28 +221,28 @@ class FindingParentInfo:
                 self.resourceName,
                 self.idNum,
                 self.owners,
-            ) = self._get_parent_info(resource, gcp_org_id)
+            ) = self._get_parent_info(resource, gcp_org_id, client)
         except ValueError as e:
             _LOGGER.error(
                 f"Error while extracting parent info: {type(e).__name__}: {e}"
             )
             raise e
 
-    def _get_parent_info(self, resource, gcp_org_id):
+    def _get_parent_info(self, resource, gcp_org_id, client=None):
         """Starting with the resource name passed, begins iterating up the
         resource parents until it hits a project, folder, or organization.
         Then grabs that asset's metadata to return relevant parent info.
         """
 
         # Begin iterating through asset parents until we hit a project, folder, or organization
-        a = self._get_asset(resource, gcp_org_id)
+        a = self._get_asset(resource, gcp_org_id, client)
         while a.security_center_properties.resource_type not in [
             "google.cloud.resourcemanager.Project",
             "google.cloud.resourcemanager.Folder",
             "google.cloud.resourcemanager.Organization",
         ]:
             a = self._get_asset(
-                a.security_center_properties.resource_parent, gcp_org_id
+                a.security_center_properties.resource_parent, gcp_org_id, client
             )
 
         # Now we have a project, folder, or organization, get the relevant metadata and return
@@ -238,7 +268,9 @@ class FindingParentInfo:
             owners,
         )
 
-    def _get_asset(self, resource, gcp_org_id):
+    def _get_asset(self, resource, gcp_org_id, client=None):
+        if client:
+            return client.get_asset(resource, gcp_org_id)
         return scc.get_asset(resource, gcp_org_id)
 
     def _extract_parent_info_project(self, asset):
