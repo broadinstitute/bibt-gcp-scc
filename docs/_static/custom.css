@@ -23,11 +23,22 @@ dl.function, .footer {
     padding-top: 10px;
 }
 
-dl.function dt {
+dl.function dl.class dt {
     border-left: 2px solid #000000;
     padding: 4px 8px;
     background-color: #ecf0f3;
 }
+
+/* Insert space between methods for readability */
+dl.method {
+    padding-top: 10px;
+    padding-bottom: 10px
+}
+
+/* Insert empty space between classes
+dl.class {
+    padding-bottom: 50px
+} */
 
 p code {
     font-size: 0.80em;

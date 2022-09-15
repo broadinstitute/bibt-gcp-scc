@@ -1,50 +1,92 @@
+"""
+Classes
+~~~~~~~
+
+Classes which may be used to handle or interact with the SCC API.
+
+"""
 import json
 import logging
 import os
 
 from google.cloud import securitycenter
 
-from . import scc
+from . import methods
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class Client:
+    r"""This class can be used to call methods in this library using the same
+    :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.SecurityCenterClient`, cutting down on API authentication flows.
+    """
+
     def __init__(self, credentials=None):
         self._client = securitycenter.SecurityCenterClient(credentials=credentials)
 
     def get_all_assets(self, **kwargs):
-        scc.get_all_assets(client=self._client, **kwargs)
+        """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_all_assets`"""
+        methods.get_all_assets(client=self._client, **kwargs)
 
     def get_all_findings(self, **kwargs):
-        scc.get_all_findings(client=self._client, **kwargs)
+        """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_all_findings`"""
+        methods.get_all_findings(client=self._client, **kwargs)
 
     def get_asset(self, **kwargs):
-        scc.get_asset(client=self._client, **kwargs)
+        """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_asset`"""
+        methods.get_asset(client=self._client, **kwargs)
 
     def get_finding(self, **kwargs):
-        scc.get_finding(client=self._client, **kwargs)
+        """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_finding`"""
+        methods.get_finding(client=self._client, **kwargs)
 
     def get_security_marks(self, **kwargs):
-        scc.get_security_marks(client=self._client, **kwargs)
+        """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_security_marks`"""
+        methods.get_security_marks(client=self._client, **kwargs)
 
     def get_sources(self, **kwargs):
-        scc.get_sources(client=self._client, **kwargs)
+        """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_sources`"""
+        methods.get_sources(client=self._client, **kwargs)
 
     def set_finding_state(self, **kwargs):
-        scc.set_finding_state(client=self._client, **kwargs)
+        """Passes all arguments to :py:func:`bibt.gcp.scc.methods.set_finding_state`"""
+        methods.set_finding_state(client=self._client, **kwargs)
 
     def set_security_marks(self, **kwargs):
-        scc.set_security_marks(client=self._client, **kwargs)
+        """Passes all arguments to :py:func:`bibt.gcp.scc.methods.set_security_marks`"""
+        methods.set_security_marks(client=self._client, **kwargs)
 
     def set_mute_status(self, **kwargs):
-        scc.set_mute_status(client=self._client, **kwargs)
+        """Passes all arguments to :py:func:`bibt.gcp.scc.methods.set_mute_status`"""
+        methods.set_mute_status(client=self._client, **kwargs)
 
 
 class FindingInfo:
-    """This class compiles information related to a given SCC finding in a standard way.
+    r"""This class compiles information related to a given SCC finding in a standard way.
     One of the issues with SCC findings is that different SCC sources pass different fields;
     here, we can standardize how fields are passed around in functions and pipelines.
+
+    Attributes:
+        name (:py:class:`str`):
+            The finding name, e.g. ``organizations/123123/sources/123123/findings/123123``.
+        category (:py:class:`str`):
+            The finding category, e.g. ``PUBLIC_BUCKET_ACL`` or ``Persistence: New Geography``.
+        source (:py:class:`str`):
+            The source of the finding, e.g. ``Security Health Analytics``.
+        severity (:py:class:`str`):
+            The finding severity, one of: ``CRITICAL``, ``HIGH``, ``MEDIUM``, ``LOW``, ``UNDEFINED``.
+        eventTime (:py:class:`datetime.datetime`):
+            The event time of the finding, typically when it was most recently triggered.
+        createTime (:py:class:`datetime.datetime`):
+            The create time of the finding, typically when it was initially triggered.
+        resourceName (:py:class:`str`):
+            The name of the resource attached to the finding, e.g. ``//storage.googleapis.com/my-bucket``.
+        securityMarks (:py:class:`dict`):
+            Any security marks set on the finding.
+        assetSecurityMarks (:py:class:`dict`):
+            Any security marks set on the finding's resource.
+        parentInfo (:py:class:`bibt.gcp.scc.classes.FindingParentInfo`):
+            A FindingParentInfo instance containing information related to the finding's parent project, folder, or organization.
     """
 
     def __init__(self, notification, gcp_org_id, client=None):
@@ -92,7 +134,7 @@ class FindingInfo:
 
     def _get_finding_source(self, finding_source, client=None):
         source_parent = "/".join(finding_source.split("/")[:2])
-        sources = scc.get_sources(source_parent, client=client)
+        sources = methods.get_sources(source_parent, client=client)
         for source in sources:
             if source.name == finding_source:
                 return source.display_name
@@ -109,7 +151,7 @@ class FindingInfo:
                     "sourceId"
                 ):
                     _LOGGER.debug(f"Using projectNumber for ETD finding parent info...")
-                    project_num = scc.get_value(
+                    project_num = methods.get_value(
                         notification, "finding.sourceProperties.sourceId.projectNumber"
                     )
                     return self._generate_parent_info(
@@ -122,7 +164,7 @@ class FindingInfo:
                     _LOGGER.debug(
                         f"Using resourceContainer for ETD finding parent info..."
                     )
-                    res_container = scc.get_value(
+                    res_container = methods.get_value(
                         notification,
                         "finding.sourceProperties.evidence[0].sourceLogId.resourceContainer",
                     )
@@ -154,7 +196,7 @@ class FindingInfo:
     def _get_finding_security_marks(self, finding_name, gcp_org_id, client=None):
         if client:
             return client.get_security_marks(finding_name, gcp_org_id)
-        return scc.get_security_marks(finding_name, gcp_org_id)
+        return methods.get_security_marks(finding_name, gcp_org_id)
 
     def _get_asset_security_marks(self, resource_name, gcp_org_id, client=None):
         """If the resource name isn't an organization, try getting the resource's
@@ -164,7 +206,7 @@ class FindingInfo:
             try:
                 if client:
                     return client.get_security_marks(resource_name, gcp_org_id)
-                return scc.get_security_marks(resource_name, gcp_org_id)
+                return methods.get_security_marks(resource_name, gcp_org_id)
             except ValueError as e:
                 _LOGGER.error(
                     "Exception caught getting asset security marks, it "
@@ -176,6 +218,7 @@ class FindingInfo:
         return None
 
     def package(self):
+        """Converts this object into a dict."""
         return {
             "name": self.name,
             "category": self.category,
@@ -191,15 +234,28 @@ class FindingInfo:
 
 
 class FindingParentInfo:
-    """This class houses information related to the parent project, folder,
+    r"""This class houses information related to the parent project, folder,
     or organization (whichever is found first in the asset's parent tree) for
     the asset of a given SCC finding. This is mostly useful in tracking down
     the appropriate owners to contact, but also helps as SCC findings don't
     pass asset/parent information in a standardized way.
+
+    Attributes:
+        displayName (:py:class:`str`):
+            The parent's display name, e.g. (for a project) "my-project".
+        type (:py:class:`str`):
+            By default, one of ``google.cloud.resourcemanager.Project``,
+            ``google.cloud.resourcemanager.Folder``, ``google.cloud.resourcemanager.Organization``.
+        resourceName (:py:class:`str`):
+            The resource name of the parent, e.g. ``//cloudresourcemanager.googleapis.com/projects/123123``.
+        idNum (:py:class:`str`):
+            The raw identification number for the project/folder/organization, without any leading prefix (e.g. "projects/").
+        owners (:py:class:`list` <str>):
+            A list of the parent's owners, including the leading prefix (e.g. ``user:`` or ``serviceAccount``).
     """
 
     def __init__(self, resource, gcp_org_id, client=None):
-        """Resource must be in the format: //compute.googleapis.com/projects/PROJECT_ID/zones/ZONE/instances/INSTANCE
+        r"""Resource must be in the format: //compute.googleapis.com/projects/PROJECT_ID/zones/ZONE/instances/INSTANCE
 
         See more: https://cloud.google.com/asset-inventory/docs/resource-name-format
         """
@@ -271,7 +327,7 @@ class FindingParentInfo:
     def _get_asset(self, resource, gcp_org_id, client=None):
         if client:
             return client.get_asset(resource, gcp_org_id)
-        return scc.get_asset(resource, gcp_org_id)
+        return methods.get_asset(resource, gcp_org_id)
 
     def _extract_parent_info_project(self, asset):
         return (

@@ -1,10 +1,8 @@
 """
-bibt.gcp.scc
-~~~~~~~~~~~~
+Methods
+~~~~~~~
 
-Functionality making use of GCP's Security Command Center.
-
-See the official Security Center Python Client documentation here: `link <https://googleapis.dev/python/securitycenter/latest/index.html>`_.
+Standalone methods which may be used to interact with the SCC API.
 
 """
 import logging
@@ -57,6 +55,9 @@ def get_all_assets(
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
 
+    :type client: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.SecurityCenterClient`
+    :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
+
     :rtype: :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.ListAssetsResponse`
     :returns: an iterator for all assets matching the specified filter.
     """
@@ -106,7 +107,7 @@ def get_all_findings(
     :param credentials: (optional) the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
 
-    :type client: :py:class:`gcp_scc:google.cloud.securitycenter.SecurityCenterClient`
+    :type client: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.SecurityCenterClient`
     :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
 
     :rtype: :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.ListFindingsResponse`
@@ -146,7 +147,7 @@ def get_asset(resource_name, gcp_org_id, credentials=None, client=None):
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
 
-    :type client: :py:class:`gcp_scc:google.cloud.securitycenter.SecurityCenterClient`
+    :type client: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.SecurityCenterClient`
     :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
 
     :rtype: :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.Asset`
@@ -261,7 +262,7 @@ def get_finding(name, gcp_org_id, credentials=None, client=None):
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
 
-    :type client: :py:class:`gcp_scc:google.cloud.securitycenter.SecurityCenterClient`
+    :type client: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.SecurityCenterClient`
     :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
 
     :rtype: :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.ListFindingsResponse.ListFindingsResult`
@@ -312,7 +313,7 @@ def get_security_marks(scc_name, gcp_org_id, credentials=None, client=None):
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
 
-    :type client: :py:class:`gcp_scc:google.cloud.securitycenter.SecurityCenterClient`
+    :type client: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.SecurityCenterClient`
     :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
 
     :rtype: :py:class:`dict`
@@ -350,7 +351,7 @@ def get_sources(parent_name, credentials=None, client=None):
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
 
-    :type client: :py:class:`gcp_scc:google.cloud.securitycenter.SecurityCenterClient`
+    :type client: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.SecurityCenterClient`
     :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
 
     :rtype: :py:class:`list` :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.Sources`
@@ -433,7 +434,7 @@ def set_finding_state(finding_name, state="INACTIVE", credentials=None, client=N
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
 
-    :type client: :py:class:`gcp_scc:google.cloud.securitycenter.SecurityCenterClient`
+    :type client: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.SecurityCenterClient`
     :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
 
     :raises KeyError: if the argument supplied for ``state`` is not a valid name
@@ -487,7 +488,7 @@ def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None, clien
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
 
-    :type client: :py:class:`gcp_scc:google.cloud.securitycenter.SecurityCenterClient`
+    :type client: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.SecurityCenterClient`
     :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
 
     :raises TypeError: if the argument supplied for ``marks`` is not a :py:class:`dict`
@@ -540,7 +541,7 @@ def set_mute_status(finding_name, status="MUTED", credentials=None, client=None)
     :param credentials: the credentials object to use when making the API call, if not to
         use the account running the function for authentication.
 
-    :type client: :py:class:`gcp_scc:google.cloud.securitycenter.SecurityCenterClient`
+    :type client: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.SecurityCenterClient`
     :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
 
     :raises KeyError: if the argument supplied for ``status`` is not ``MUTED`` or ``UNMUTED`` .
