@@ -36,9 +36,7 @@ extensions = [
 
 autosummary_generate = True
 
-autodoc_mock_imports = [
-    "google",
-]
+autodoc_mock_imports = ["google", "inflection"]
 
 coverage_show_missing_items = True
 

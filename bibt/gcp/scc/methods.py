@@ -7,7 +7,6 @@ Standalone methods which may be used to interact with the SCC API.
 """
 import logging
 from datetime import datetime
-from typing import Type
 
 import pytz
 from google.cloud import securitycenter

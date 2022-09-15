@@ -7,7 +7,6 @@ Classes which may be used to handle or interact with the SCC API.
 """
 import json
 import logging
-import os
 
 from google.cloud import securitycenter
 
