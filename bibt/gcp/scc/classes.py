@@ -20,44 +20,57 @@ class Client:
     :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.SecurityCenterClient`, cutting down on API authentication flows.
     """
 
-    def __init__(self, credentials=None):
+    def __init__(self, gcp_org_id, credentials=None):
         self._client = securitycenter.SecurityCenterClient(credentials=credentials)
+        self.gcp_org_id = gcp_org_id
 
     def get_all_assets(self, **kwargs):
         """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_all_assets`"""
-        methods.get_all_assets(client=self._client, **kwargs)
+        return methods.get_all_assets(
+            gcp_org_id=self.gcp_org_id, client=self._client, **kwargs
+        )
 
     def get_all_findings(self, **kwargs):
         """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_all_findings`"""
-        methods.get_all_findings(client=self._client, **kwargs)
+        return methods.get_all_findings(
+            gcp_org_id=self.gcp_org_id, client=self._client, **kwargs
+        )
 
     def get_asset(self, **kwargs):
         """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_asset`"""
-        methods.get_asset(client=self._client, **kwargs)
+        return methods.get_asset(
+            gcp_org_id=self.gcp_org_id, client=self._client, **kwargs
+        )
 
     def get_finding(self, **kwargs):
         """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_finding`"""
-        methods.get_finding(client=self._client, **kwargs)
+        return methods.get_finding(
+            gcp_org_id=self.gcp_org_id, client=self._client, **kwargs
+        )
 
     def get_security_marks(self, **kwargs):
         """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_security_marks`"""
-        methods.get_security_marks(client=self._client, **kwargs)
+        return methods.get_security_marks(
+            gcp_org_id=self.gcp_org_id, client=self._client, **kwargs
+        )
 
     def get_sources(self, **kwargs):
         """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_sources`"""
-        methods.get_sources(client=self._client, **kwargs)
+        return methods.get_sources(client=self._client, **kwargs)
 
     def set_finding_state(self, **kwargs):
         """Passes all arguments to :py:func:`bibt.gcp.scc.methods.set_finding_state`"""
-        methods.set_finding_state(client=self._client, **kwargs)
+        return methods.set_finding_state(client=self._client, **kwargs)
 
     def set_security_marks(self, **kwargs):
         """Passes all arguments to :py:func:`bibt.gcp.scc.methods.set_security_marks`"""
-        methods.set_security_marks(client=self._client, **kwargs)
+        return methods.set_security_marks(
+            gcp_org_id=self.gcp_org_id, client=self._client, **kwargs
+        )
 
     def set_mute_status(self, **kwargs):
         """Passes all arguments to :py:func:`bibt.gcp.scc.methods.set_mute_status`"""
-        methods.set_mute_status(client=self._client, **kwargs)
+        return methods.set_mute_status(client=self._client, **kwargs)
 
 
 class FindingInfo:
@@ -241,7 +254,7 @@ class FindingParentInfo:
 
     Attributes:
         displayName (:py:class:`str`):
-            The parent's display name, e.g. (for a project) "my-project".
+            The parent's display name, e.g. (for a project) ``my-project``.
         type (:py:class:`str`):
             By default, one of ``google.cloud.resourcemanager.Project``,
             ``google.cloud.resourcemanager.Folder``, ``google.cloud.resourcemanager.Organization``.
@@ -250,7 +263,7 @@ class FindingParentInfo:
         idNum (:py:class:`str`):
             The raw identification number for the project/folder/organization, without any leading prefix (e.g. "projects/").
         owners (:py:class:`list` <str>):
-            A list of the parent's owners, including the leading prefix (e.g. ``user:`` or ``serviceAccount``).
+            A list of the parent's owners, including the leading prefix (e.g. ``user:`` or ``serviceAccount:``).
     """
 
     def __init__(self, resource, gcp_org_id, client=None):
