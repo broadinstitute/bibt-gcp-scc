@@ -186,7 +186,7 @@ class FindingInfo:
                         client=client,
                     )
         except (ValueError, KeyError) as e:
-            _LOGGER.error(f"Error getting ETD parent info: {type(e).__name__}: {e}")
+            _LOGGER.warning(f"Error getting ETD parent info: {type(e).__name__}: {e}")
             pass
 
         # If a non-ETD finding, try using resource.project_name
@@ -220,7 +220,7 @@ class FindingInfo:
                     return client.get_security_marks(resource_name, gcp_org_id)
                 return methods.get_security_marks(resource_name, gcp_org_id)
             except ValueError as e:
-                _LOGGER.error(
+                _LOGGER.warning(
                     "Exception caught getting asset security marks, it "
                     f"may have been deleted: {type(e).__name__}: {e}"
                 )
@@ -291,7 +291,7 @@ class FindingParentInfo:
                 self.owners,
             ) = self._get_parent_info(resource, gcp_org_id, client)
         except ValueError as e:
-            _LOGGER.error(
+            _LOGGER.warning(
                 f"Error while extracting parent info: {type(e).__name__}: {e}"
             )
             raise e

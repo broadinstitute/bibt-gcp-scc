@@ -608,7 +608,7 @@ def _get(obj, attr, raise_exception):
                 f"Could not find attribute value [{attr}] in object of type: {type(obj).__name__}"
             )
         else:
-            _LOGGER.error(
+            _LOGGER.warning(
                 f"Could not find attribute value [{attr}] in object of type: {type(obj).__name__}; returning None."
             )
             return None
