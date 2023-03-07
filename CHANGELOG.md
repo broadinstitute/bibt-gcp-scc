@@ -2,6 +2,10 @@
 
 [PyPI History](https://pypi.org/project/bibt-gcp-scc/#history)
 
+## 0.8.0 (2023-03-07)
+
+* Updated dependencies across the project (pre-commit, github actions, python deps).
+
 ## 0.6.16 (2022-09-13)
 
 * Added support for `bibt.gcp.scc.Client` to `bibt.gcp.scc.FindingInfo` and `bibt.gcp.scc.FindingParentInfo`. A `Client` can be passed to these classes' constructors for use by that class's methods. This can significantly cut down on API calls as authentication only needs to happen once.
