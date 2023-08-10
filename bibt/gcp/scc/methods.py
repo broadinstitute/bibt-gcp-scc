@@ -20,56 +20,56 @@ from inflection import underscore
 _LOGGER = logging.getLogger(__name__)
 
 
-def get_all_assets(
-    filter, gcp_org_id, order_by=None, page_size=1000, credentials=None, client=None
-):
-    """Returns all assets matching a particular filter.
+# def get_all_assets(
+#     filter, gcp_org_id, order_by=None, page_size=1000, credentials=None, client=None
+# ):
+#     """Returns all assets matching a particular filter.
 
-    .. code:: python
+#     .. code:: python
 
-        from bibt.gcp import scc
-        for _ in scc.get_all_assets(
-            filter='securityCenterProperties.resourceType="google.container.Cluster"',
-            gcp_org_id=123123
-        ):
-            print(_.asset.name)
+#         from bibt.gcp import scc
+#         for _ in scc.get_all_assets(
+#             filter='securityCenterProperties.resourceType="google.container.Cluster"',
+#             gcp_org_id=123123
+#         ):
+#             print(_.asset.name)
 
-    :type filter: :py:class:`str`
-    :param filter: the filter to use. See
-        `here <https://googleapis.dev/python/securitycenter/latest/securitycenter_v1/types.html#google.cloud.securitycenter_v1.types.ListAssetsRequest.filter>`__
-        for more on valid filter syntax.
+#     :type filter: :py:class:`str`
+#     :param filter: the filter to use. See
+#         `here <https://googleapis.dev/python/securitycenter/latest/securitycenter_v1/types.html#google.cloud.securitycenter_v1.types.ListAssetsRequest.filter>`__
+#         for more on valid filter syntax.
 
-    :type order_by: :py:class:`str`
-    :param order_by: the sort order of the assets. See
-        `here <https://googleapis.dev/python/securitycenter/latest/securitycenter_v1/types.html#google.cloud.securitycenter_v1.types.ListAssetsRequest.order_by>`__
-        for more on valid arguments. Default is None.
+#     :type order_by: :py:class:`str`
+#     :param order_by: the sort order of the assets. See
+#         `here <https://googleapis.dev/python/securitycenter/latest/securitycenter_v1/types.html#google.cloud.securitycenter_v1.types.ListAssetsRequest.order_by>`__
+#         for more on valid arguments. Default is None.
 
-    :type gcp_org_id: :py:class:`str`
-    :param gcp_org_id: the GCP organization ID under which to search.
+#     :type gcp_org_id: :py:class:`str`
+#     :param gcp_org_id: the GCP organization ID under which to search.
 
-    :type page_size: :py:class:`int`
-    :param page_size: the page size for the API requests. max and default is ``1000`` .
+#     :type page_size: :py:class:`int`
+#     :param page_size: the page size for the API requests. max and default is ``1000`` .
 
-    :type credentials: :py:class:`google_auth:google.oauth2.credentials.Credentials`
-    :param credentials: the credentials object to use when making the API call, if not to
-        use the account running the function for authentication.
+#     :type credentials: :py:class:`google_auth:google.oauth2.credentials.Credentials`
+#     :param credentials: the credentials object to use when making the API call, if not to
+#         use the account running the function for authentication.
 
-    :type client: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.SecurityCenterClient`
-    :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
+#     :type client: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.SecurityCenterClient`
+#     :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
 
-    :rtype: :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.ListAssetsResponse`
-    :returns: an iterator for all assets matching the specified filter.
-    """
-    return _get_all_assets_iter(
-        request={
-            "parent": f"organizations/{gcp_org_id}",
-            "filter": filter,
-            "order_by": order_by,
-            "page_size": page_size,
-        },
-        credentials=credentials,
-        client=client,
-    )
+#     :rtype: :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.ListAssetsResponse`
+#     :returns: an iterator for all assets matching the specified filter.
+#     """
+#     return _get_all_assets_iter(
+#         request={
+#             "parent": f"organizations/{gcp_org_id}",
+#             "filter": filter,
+#             "order_by": order_by,
+#             "page_size": page_size,
+#         },
+#         credentials=credentials,
+#         client=client,
+#     )
 
 
 def get_all_findings(
@@ -124,54 +124,54 @@ def get_all_findings(
     )
 
 
-def get_asset(resource_name, gcp_org_id, credentials=None, client=None):
-    """This function returns the asset object specified by name.
+# def get_asset(resource_name, gcp_org_id, credentials=None, client=None):
+#     """This function returns the asset object specified by name.
 
-    .. code:: python
+#     .. code:: python
 
-        from bibt.gcp import scc
-        a = scc.get_asset(
-            resource_name='//container.googleapis.com/projects/123123/zones/us-central1-a/clusters/my-cluster',
-            gcp_org_id=123123
-        )
-        print(a.asset.name, a.asset.createTime)
+#         from bibt.gcp import scc
+#         a = scc.get_asset(
+#             resource_name='//container.googleapis.com/projects/123123/zones/us-central1-a/clusters/my-cluster',
+#             gcp_org_id=123123
+#         )
+#         print(a.asset.name, a.asset.createTime)
 
-    :type resource_name: :py:class:`str`
-    :param resource_name: the ``resource.name`` to fetch.
+#     :type resource_name: :py:class:`str`
+#     :param resource_name: the ``resource.name`` to fetch.
 
-    :type gcp_org_id: :py:class:`str`
-    :param gcp_org_id: the GCP organization ID under which to search.
+#     :type gcp_org_id: :py:class:`str`
+#     :param gcp_org_id: the GCP organization ID under which to search.
 
-    :type credentials: :py:class:`google_auth:google.oauth2.credentials.Credentials`
-    :param credentials: the credentials object to use when making the API call, if not to
-        use the account running the function for authentication.
+#     :type credentials: :py:class:`google_auth:google.oauth2.credentials.Credentials`
+#     :param credentials: the credentials object to use when making the API call, if not to
+#         use the account running the function for authentication.
 
-    :type client: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.SecurityCenterClient`
-    :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
+#     :type client: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.SecurityCenterClient`
+#     :param client: (optional) the SCC client to use for API calls. will generate one if not passed.
 
-    :rtype: :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.Asset`
-    :returns: the specified asset object.
+#     :rtype: :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.Asset`
+#     :returns: the specified asset object.
 
-    :raises ValueError: if no asset under the supplied resource_name is found.
-    """
-    assets = _get_all_assets_iter(
-        request={
-            "parent": f"organizations/{gcp_org_id}",
-            "filter": f'security_center_properties.resource_name="{resource_name}"',
-            "page_size": 1,
-        },
-        credentials=credentials,
-        client=client,
-    )
-    try:
-        _, a = next(enumerate(assets))
-        return a.asset
-    except StopIteration:
-        raise ValueError(
-            "No asset object returned for "
-            f'security_center_properties.resource_name="{resource_name}" in '
-            f"organizations/{gcp_org_id}"
-        )
+#     :raises ValueError: if no asset under the supplied resource_name is found.
+#     """
+#     assets = _get_all_assets_iter(
+#         request={
+#             "parent": f"organizations/{gcp_org_id}",
+#             "filter": f'security_center_properties.resource_name="{resource_name}"',
+#             "page_size": 1,
+#         },
+#         credentials=credentials,
+#         client=client,
+#     )
+#     try:
+#         _, a = next(enumerate(assets))
+#         return a.asset
+#     except StopIteration:
+#         raise ValueError(
+#             "No asset object returned for "
+#             f'security_center_properties.resource_name="{resource_name}" in '
+#             f"organizations/{gcp_org_id}"
+#         )
 
 
 def get_value(obj, path, raise_exception=True):
@@ -325,11 +325,11 @@ def get_security_marks(scc_name, gcp_org_id, credentials=None, client=None):
         f = get_finding(scc_name, gcp_org_id, credentials, client)
         if "security_marks" in f.finding:
             return dict(f.finding.security_marks.marks)
-    elif scc_name.startswith("//"):
-        _LOGGER.debug(f'Assuming type "asset" from scc_name format: {scc_name}')
-        a = get_asset(scc_name, gcp_org_id, credentials, client)
-        if "security_marks" in a:
-            return dict(a.security_marks.marks)
+    # elif scc_name.startswith("//"):
+    #     _LOGGER.debug(f'Assuming type "asset" from scc_name format: {scc_name}')
+    #     a = get_asset(scc_name, gcp_org_id, credentials, client)
+    #     if "security_marks" in a:
+    #         return dict(a.security_marks.marks)
     else:
         raise TypeError(f"Unrecognized scc_name type: {scc_name}")
     return {}
@@ -496,14 +496,14 @@ def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None, clien
         raise TypeError(
             f"Argument: 'marks' must be a dict! You passed a {type(marks).__name__}."
         )
-    if scc_name.startswith("//"):
-        _LOGGER.debug(f'Assuming type "asset" from scc_name format: {scc_name}')
-        if not gcp_org_id:
-            raise TypeError(
-                f"When setting security marks on an asset, a `gcp_org_id` must be supplied."
-            )
-        a = get_asset(scc_name, gcp_org_id, credentials)
-        scc_name = a.name
+    # if scc_name.startswith("//"):
+    #     _LOGGER.debug(f'Assuming type "asset" from scc_name format: {scc_name}')
+    #     if not gcp_org_id:
+    #         raise TypeError(
+    #             f"When setting security marks on an asset, a `gcp_org_id` must be supplied."
+    #         )
+    #     a = get_asset(scc_name, gcp_org_id, credentials)
+    #     scc_name = a.name
 
     mask_paths = [f"marks.{k}" for k in marks.keys()]
 
@@ -570,15 +570,15 @@ def _get_all_findings_iter(request, credentials=None, client=None):
     return client.list_findings(request)
 
 
-def _get_all_assets_iter(request, credentials=None, client=None):
-    """A helper method to make a list_assets API call. Expects a valid ``request``
-    dictionary and can optionally be supplied with a credentials object.
+# def _get_all_assets_iter(request, credentials=None, client=None):
+#     """A helper method to make a list_assets API call. Expects a valid ``request``
+#     dictionary and can optionally be supplied with a credentials object.
 
-    Returns: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.pagers.ListAssetsPager`
-    """
-    if not client:
-        client = securitycenter.SecurityCenterClient(credentials=credentials)
-    return client.list_assets(request)
+#     Returns: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.pagers.ListAssetsPager`
+#     """
+#     if not client:
+#         client = securitycenter.SecurityCenterClient(credentials=credentials)
+#     return client.list_assets(request)
 
 
 def _get(obj, attr, raise_exception):
