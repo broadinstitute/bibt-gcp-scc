@@ -18,13 +18,13 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.1
+    rev: v1.5.4
     hooks:
       - id: remove-crlf
       - id: remove-tabs
 
   - repo: https://github.com/asottile/reorder-python-imports
-    rev: v3.10.0
+    rev: v3.11.0
     hooks:
       - id: reorder-python-imports
 
@@ -35,7 +35,7 @@ repos:
         args: ["--disable-plugin", "KeywordDetector"]
 
   - repo: https://github.com/psf/black
-    rev: 23.3.0
+    rev: 23.9.1
     hooks:
       - id: black
         # It is recommended to specify the latest version of Python
