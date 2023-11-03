@@ -17,8 +17,6 @@ from google.protobuf.json_format import ParseError
 from inflection import camelize
 from inflection import underscore
 
-from bibt.gcp.scc import Client as bibt_client
-
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -358,10 +356,11 @@ def get_sources(parent_name, credentials=None, client=None):
     :rtype: :py:class:`list` :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.Sources`
     :returns: a list of SCC Source objects
     """
-    if isinstance(client, bibt_client):
-        client = bibt_client._client
     if not isinstance(client, securitycenter.SecurityCenterClient):
-        client = securitycenter.SecurityCenterClient(credentials=credentials)
+        try:
+            client = client._client
+        except Exception:
+            client = securitycenter.SecurityCenterClient(credentials=credentials)
     return [source for source in client.list_sources(parent=parent_name)]
 
 
@@ -450,10 +449,11 @@ def set_finding_state(finding_name, state="INACTIVE", credentials=None, client=N
             f"Supplied state ({state}) not recognized. Must be one of {[s.name for s in Finding.State]}"
         )
 
-    if isinstance(client, bibt_client):
-        client = bibt_client._client
     if not isinstance(client, securitycenter.SecurityCenterClient):
-        client = securitycenter.SecurityCenterClient(credentials=credentials)
+        try:
+            client = client._client
+        except Exception:
+            client = securitycenter.SecurityCenterClient(credentials=credentials)
     client.set_finding_state(
         request={
             "name": finding_name,
@@ -513,10 +513,11 @@ def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None, clien
 
     mask_paths = [f"marks.{k}" for k in marks.keys()]
 
-    if isinstance(client, bibt_client):
-        client = bibt_client._client
     if not isinstance(client, securitycenter.SecurityCenterClient):
-        client = securitycenter.SecurityCenterClient(credentials=credentials)
+        try:
+            client = client._client
+        except Exception:
+            client = securitycenter.SecurityCenterClient(credentials=credentials)
     client.update_security_marks(
         request={
             "security_marks": {"name": f"{scc_name}/securityMarks", "marks": marks},
@@ -553,10 +554,11 @@ def set_mute_status(finding_name, status="MUTED", credentials=None, client=None)
 
     :raises KeyError: if the argument supplied for ``status`` is not ``MUTED`` or ``UNMUTED`` .
     """
-    if isinstance(client, bibt_client):
-        client = bibt_client._client
     if not isinstance(client, securitycenter.SecurityCenterClient):
-        client = securitycenter.SecurityCenterClient(credentials=credentials)
+        try:
+            client = client._client
+        except Exception:
+            client = securitycenter.SecurityCenterClient(credentials=credentials)
 
     if status in ["MUTED", "UNMUTED"]:
         mute_enum = Finding.Mute[status]
@@ -575,10 +577,11 @@ def _get_all_findings_iter(request, credentials=None, client=None):
 
     Returns: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.pagers.ListFindingsPager`
     """
-    if isinstance(client, bibt_client):
-        client = bibt_client._client
     if not isinstance(client, securitycenter.SecurityCenterClient):
-        client = securitycenter.SecurityCenterClient(credentials=credentials)
+        try:
+            client = client._client
+        except Exception:
+            client = securitycenter.SecurityCenterClient(credentials=credentials)
     return client.list_findings(request)
 
 
