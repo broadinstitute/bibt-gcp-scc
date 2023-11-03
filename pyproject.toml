@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "bibt-gcp-scc"
-version = "1.0.2"
+version = "1.0.3"
 authors = [{ name = "Matthew OBrien", email = "mobrien@broadinstitute.org" }]
 description = "Functionality often used by BITS Blue Team (GCP SCC Module)."
 readme = { file = "README.md", content-type = "text/markdown" }
