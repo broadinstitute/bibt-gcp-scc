@@ -1,4 +1,4 @@
-from .classes import Client
+# from .classes import Client
 from .classes import FindingInfo
 from .methods import get_all_findings
 from .methods import get_finding
@@ -28,7 +28,7 @@ __all__ = (
     "set_finding_state",
     "set_security_marks",
     "set_mute_status",
-    "Client",
+    # "Client",
     "FindingInfo",
     # "FindingParentInfo",
 )
