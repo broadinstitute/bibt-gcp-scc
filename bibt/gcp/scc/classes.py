@@ -15,64 +15,6 @@ from . import methods
 _LOGGER = logging.getLogger(__name__)
 
 
-class Client:
-    r"""This class can be used to call methods in this library using the same
-    :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.SecurityCenterClient`, cutting down on API authentication flows.
-    """
-
-    def __init__(self, gcp_org_id, credentials=None):
-        self._client = securitycenter.SecurityCenterClient(credentials=credentials)
-        self.gcp_org_id = gcp_org_id
-
-    # def get_all_assets(self, **kwargs):
-    #     """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_all_assets`"""
-    #     return methods.get_all_assets(
-    #         gcp_org_id=self.gcp_org_id, client=self._client, **kwargs
-    #     )
-
-    def get_all_findings(self, **kwargs):
-        """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_all_findings`"""
-        return methods.get_all_findings(
-            gcp_org_id=self.gcp_org_id, client=self._client, **kwargs
-        )
-
-    # def get_asset(self, **kwargs):
-    #     """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_asset`"""
-    #     return methods.get_asset(
-    #         gcp_org_id=self.gcp_org_id, client=self._client, **kwargs
-    #     )
-
-    def get_finding(self, **kwargs):
-        """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_finding`"""
-        return methods.get_finding(
-            gcp_org_id=self.gcp_org_id, client=self._client, **kwargs
-        )
-
-    def get_security_marks(self, **kwargs):
-        """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_security_marks`"""
-        return methods.get_security_marks(
-            gcp_org_id=self.gcp_org_id, client=self._client, **kwargs
-        )
-
-    def get_sources(self, **kwargs):
-        """Passes all arguments to :py:func:`bibt.gcp.scc.methods.get_sources`"""
-        return methods.get_sources(client=self._client, **kwargs)
-
-    def set_finding_state(self, **kwargs):
-        """Passes all arguments to :py:func:`bibt.gcp.scc.methods.set_finding_state`"""
-        return methods.set_finding_state(client=self._client, **kwargs)
-
-    def set_security_marks(self, **kwargs):
-        """Passes all arguments to :py:func:`bibt.gcp.scc.methods.set_security_marks`"""
-        return methods.set_security_marks(
-            gcp_org_id=self.gcp_org_id, client=self._client, **kwargs
-        )
-
-    def set_mute_status(self, **kwargs):
-        """Passes all arguments to :py:func:`bibt.gcp.scc.methods.set_mute_status`"""
-        return methods.set_mute_status(client=self._client, **kwargs)
-
-
 class FindingInfo:
     r"""This class compiles information related to a given SCC finding in a standard way.
     One of the issues with SCC findings is that different SCC sources pass different fields;
@@ -105,10 +47,13 @@ class FindingInfo:
         _LOGGER.info(
             f"Creating FindingInfo object for finding: {notification.finding.name}"
         )
-        if not (isinstance(client, Client) or client == None):
+        if not (
+            isinstance(client, securitycenter.SecurityCenterClient) or client is None
+        ):
             _LOGGER.error(
                 "The `client` parameter must be an instance of "
-                "bibt.gcp.scc.Client or a derived subclass (or None). "
+                "securitycenter.SecurityCenterClient, bibt.gcp.scc.Client, "
+                "a derived subclass, or None. "
                 f"You passed: {str(client.__class__.__mro__)}. Proceeding "
                 "without the use of the client."
             )
@@ -204,9 +149,7 @@ class FindingInfo:
     #     return FindingParentInfo(resource_name, gcp_org_id, client)
 
     def _get_finding_security_marks(self, finding_name, gcp_org_id, client=None):
-        if client:
-            return client.get_security_marks(finding_name, gcp_org_id)
-        return methods.get_security_marks(finding_name, gcp_org_id)
+        return methods.get_security_marks(finding_name, gcp_org_id, client=client)
 
     # def _get_asset_security_marks(self, resource_name, gcp_org_id, client=None):
     #     """If the resource name isn't an organization, try getting the resource's

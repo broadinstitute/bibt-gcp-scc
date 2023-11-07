@@ -357,10 +357,7 @@ def get_sources(parent_name, credentials=None, client=None):
     :returns: a list of SCC Source objects
     """
     if not isinstance(client, securitycenter.SecurityCenterClient):
-        try:
-            client = client._client
-        except Exception:
-            client = securitycenter.SecurityCenterClient(credentials=credentials)
+        client = securitycenter.SecurityCenterClient(credentials=credentials)
     return [source for source in client.list_sources(parent=parent_name)]
 
 
@@ -450,10 +447,7 @@ def set_finding_state(finding_name, state="INACTIVE", credentials=None, client=N
         )
 
     if not isinstance(client, securitycenter.SecurityCenterClient):
-        try:
-            client = client._client
-        except Exception:
-            client = securitycenter.SecurityCenterClient(credentials=credentials)
+        client = securitycenter.SecurityCenterClient(credentials=credentials)
     client.set_finding_state(
         request={
             "name": finding_name,
@@ -514,10 +508,7 @@ def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None, clien
     mask_paths = [f"marks.{k}" for k in marks.keys()]
 
     if not isinstance(client, securitycenter.SecurityCenterClient):
-        try:
-            client = client._client
-        except Exception:
-            client = securitycenter.SecurityCenterClient(credentials=credentials)
+        client = securitycenter.SecurityCenterClient(credentials=credentials)
     client.update_security_marks(
         request={
             "security_marks": {"name": f"{scc_name}/securityMarks", "marks": marks},
@@ -555,10 +546,7 @@ def set_mute_status(finding_name, status="MUTED", credentials=None, client=None)
     :raises KeyError: if the argument supplied for ``status`` is not ``MUTED`` or ``UNMUTED`` .
     """
     if not isinstance(client, securitycenter.SecurityCenterClient):
-        try:
-            client = client._client
-        except Exception:
-            client = securitycenter.SecurityCenterClient(credentials=credentials)
+        client = securitycenter.SecurityCenterClient(credentials=credentials)
 
     if status in ["MUTED", "UNMUTED"]:
         mute_enum = Finding.Mute[status]
@@ -578,10 +566,7 @@ def _get_all_findings_iter(request, credentials=None, client=None):
     Returns: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.pagers.ListFindingsPager`
     """
     if not isinstance(client, securitycenter.SecurityCenterClient):
-        try:
-            client = client._client
-        except Exception:
-            client = securitycenter.SecurityCenterClient(credentials=credentials)
+        client = securitycenter.SecurityCenterClient(credentials=credentials)
     return client.list_findings(request)
 
 

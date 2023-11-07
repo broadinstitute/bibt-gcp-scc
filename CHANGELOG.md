@@ -2,6 +2,10 @@
 
 [PyPI History](https://pypi.org/project/bibt-gcp-scc/#history)
 
+## 1.1.0 (2023-11-07)
+
+- **[BREAKING CHANGE]** Remove custom Client object as it is just redundant.
+
 ## 1.0.0 (2023-08-10)
 
 - **[BREAKING CHANGE]** [SCC Asset API is being deprecated](https://cloud.google.com/security-command-center/docs/release-notes#June_28_2023). This version simply remove all calls going to this API.
