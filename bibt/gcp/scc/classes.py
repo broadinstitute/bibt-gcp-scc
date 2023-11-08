@@ -53,7 +53,7 @@ class FindingInfo:
             or isinstance(client, securitycenter_v1.SecurityCenterClient)
             or client is None
         ):
-            _LOGGER.error(
+            _LOGGER.warning(
                 "The `client` parameter must be an instance of "
                 "securitycenter.SecurityCenterClient, "
                 "securitycenter_v1.SecurityCenterClient, "
