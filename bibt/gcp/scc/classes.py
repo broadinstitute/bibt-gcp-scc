@@ -9,6 +9,7 @@ import json
 import logging
 
 from google.cloud import securitycenter
+from google.cloud import securitycenter_v1
 
 from . import methods
 
@@ -48,11 +49,14 @@ class FindingInfo:
             f"Creating FindingInfo object for finding: {notification.finding.name}"
         )
         if not (
-            isinstance(client, securitycenter.SecurityCenterClient) or client is None
+            isinstance(client, securitycenter.SecurityCenterClient)
+            or isinstance(client, securitycenter_v1.SecurityCenterClient)
+            or client is None
         ):
             _LOGGER.error(
                 "The `client` parameter must be an instance of "
-                "securitycenter.SecurityCenterClient, bibt.gcp.scc.Client, "
+                "securitycenter.SecurityCenterClient, "
+                "securitycenter_v1.SecurityCenterClient, "
                 "a derived subclass, or None. "
                 f"You passed: {str(client.__class__.__mro__)}. Proceeding "
                 "without the use of the client."
