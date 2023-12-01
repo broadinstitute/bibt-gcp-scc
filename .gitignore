@@ -233,6 +233,7 @@ cython_debug/
 
 # Exceptions
 !.terraform.lock.hcl
+!requirements*.txt
 !terraform*/schema/**/*.json
 !.pre-commit-config.yaml
 !schema.json
