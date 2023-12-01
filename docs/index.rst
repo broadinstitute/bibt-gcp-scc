@@ -8,14 +8,11 @@ bibt-gcp-scc: BITS Blue Team Utilities: GCP Security Command Center Module
 -  **Project Documentation**: https://bibt-gcp-scc.readthedocs.io/en/latest/
 
 
-|build| |docs| |last_commit|
+|docs| |last_commit|
 
-|status| |pypi| |deps|
+|status| |pypi| |top_lang|
 
-|versions| |code_lines| |top_lang| |pypi_installs|
-
-.. |pypi| image:: https://img.shields.io/pypi/v/bibt-gcp-scc
-   :target: https://pypi.org/project/bibt-gcp-scc/
+|versions| |pypi_installs|
 
 .. |versions| image:: https://img.shields.io/pypi/pyversions/bibt-gcp-scc
    :target: https://pypi.org/project/bibt-gcp-scc/
@@ -23,12 +20,9 @@ bibt-gcp-scc: BITS Blue Team Utilities: GCP Security Command Center Module
 .. |docs| image:: https://img.shields.io/readthedocs/bibt-gcp-scc
    :target: https://bibt-gcp-scc.readthedocs.io/
 
-.. |build| image:: https://img.shields.io/github/workflow/status/broadinstitute/bibt-gcp-scc/publish%20package%20to%20pypi
+.. |build| image:: https://img.shields.io/github/workflow/status/broadinstitute/bibt-gcp-scc/publish%20to%20pypi
 
 .. |last_commit| image:: https://img.shields.io/github/last-commit/broadinstitute/bibt-gcp-scc
-   :target: https://github.com/broadinstitute/bibt-gcp-scc
-
-.. |code_lines| image:: https://img.shields.io/tokei/lines/github/broadinstitute/bibt-gcp-scc
    :target: https://github.com/broadinstitute/bibt-gcp-scc
 
 .. |pypi_installs| image:: https://img.shields.io/pypi/dm/bibt-gcp-scc?label=pypi%20installs
