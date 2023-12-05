@@ -10,11 +10,10 @@
 import os
 import sys
 
-from bibt.gcp import scc
-
 sys.path.insert(0, os.path.abspath(".."))
 sys.path.insert(0, os.path.abspath("."))
 
+from bibt.gcp import scc  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
@@ -22,7 +21,7 @@ project = "bibt-gcp-scc"
 copyright = "2022, Matthew OBrien"
 author = "Matthew OBrien"
 version = scc.__version__
-release = scc.__version__
+release = version
 
 
 # -- General configuration ---------------------------------------------------
