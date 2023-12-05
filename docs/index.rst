@@ -10,27 +10,25 @@ bibt-gcp-scc: BITS Blue Team Utilities: GCP Security Command Center Module
 
 |docs| |last_commit|
 
-|status| |pypi| |top_lang|
+|status| |top_lang|
 
 |versions| |pypi_installs|
-
-.. |versions| image:: https://img.shields.io/pypi/pyversions/bibt-gcp-scc
-   :target: https://pypi.org/project/bibt-gcp-scc/
 
 .. |docs| image:: https://img.shields.io/readthedocs/bibt-gcp-scc
    :target: https://bibt-gcp-scc.readthedocs.io/
 
-.. |build| image:: https://img.shields.io/github/workflow/status/broadinstitute/bibt-gcp-scc/publish%20to%20pypi
-
 .. |last_commit| image:: https://img.shields.io/github/last-commit/broadinstitute/bibt-gcp-scc
    :target: https://github.com/broadinstitute/bibt-gcp-scc
 
-.. |pypi_installs| image:: https://img.shields.io/pypi/dm/bibt-gcp-scc?label=pypi%20installs
-   :target: https://pypi.org/project/bibt-gcp-scc/
+.. |status| image:: https://img.shields.io/badge/status-beta-orange
 
 .. |top_lang| image:: https://img.shields.io/github/languages/top/broadinstitute/bibt-gcp-scc
 
-.. |status| image:: https://img.shields.io/badge/status-beta-orange
+.. |versions| image:: https://img.shields.io/pypi/pyversions/bibt-gcp-scc
+   :target: https://pypi.org/project/bibt-gcp-scc/
+
+.. |pypi_installs| image:: https://img.shields.io/pypi/dm/bibt-gcp-scc?label=pypi%20installs
+   :target: https://pypi.org/project/bibt-gcp-scc/
 
 Installing
 ----------
