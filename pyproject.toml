@@ -24,7 +24,7 @@ dependencies = [
   "google-cloud-securitycenter==1.25.0",
   "googleapis-common-protos==1.62.0",
   "inflection==0.5.1",
-  "protobuf==4.25.1",
+  "protobuf==4.25.2",
   "pytz==2023.3",
 ]
 description = "Functionality often used by BITS Blue Team (GCP SCC Module)."
