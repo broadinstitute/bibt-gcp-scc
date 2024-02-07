@@ -60,7 +60,7 @@ def get_all_findings(
 
     :rtype: :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.ListFindingsResponse`
     :returns: an iterator for all findings matching the filter.
-    """
+    """  # noqa: E501
     return _get_all_findings_iter(
         request={
             "parent": f"organizations/{gcp_org_id}/sources/-",
@@ -172,7 +172,7 @@ def get_finding(name, gcp_org_id, credentials=None, client=None):
     :returns: the specified finding object, paired with its resource information.
 
     :raises ValueError: if no finding under the supplied name is found.
-    """
+    """  # noqa: E501
     findings = _get_all_findings_iter(
         request={
             "parent": f"organizations/{gcp_org_id}/sources/-",
@@ -225,7 +225,7 @@ def get_security_marks(scc_name, gcp_org_id, credentials=None, client=None):
     :returns: a dictionary containing security marks as key/value pairs.
 
     :raises TypeError: if scc_name is not in a recognizeable format.
-    """
+    """  # noqa: E501
     if "/findings/" in scc_name:
         _LOGGER.debug(f'Assuming type "finding" from scc_name format: {scc_name}')
         f = get_finding(scc_name, gcp_org_id, credentials, client)
@@ -258,7 +258,7 @@ def get_sources(parent_name, credentials=None, client=None):
 
     :rtype: :py:class:`list` :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.Sources`
     :returns: a list of SCC Source objects
-    """
+    """  # noqa: E501
     if not isinstance(client, securitycenter.SecurityCenterClient):
         client = securitycenter.SecurityCenterClient(credentials=credentials)
     return [source for source in client.list_sources(parent=parent_name)]
@@ -295,7 +295,7 @@ def parse_notification(notification, ignore_unknown_fields=False):
 
     :raises TypeError: if it is passed anything aside from a :py:class:`str`
         or :py:class:`dict`, or it has an issue parsing the finding into an object.
-    """
+    """  # noqa: E501
     from google.cloud.securitycenter_v1.types import ListFindingsResponse
 
     if isinstance(notification, dict):
@@ -348,12 +348,13 @@ def set_finding_state(finding_name, state="INACTIVE", credentials=None, client=N
 
     :raises KeyError: if the argument supplied for ``state`` is not a valid name
         for :py:class:`gcp_scc:google.cloud.securitycenter_v1.types.Finding.State`.
-    """
+    """  # noqa: E501
     try:
         state_enum = Finding.State[state]
     except KeyError:
         raise KeyError(
-            f"Supplied state ({state}) not recognized. Must be one of {[s.name for s in Finding.State]}"
+            f"Supplied state ({state}) not recognized. "
+            f"Must be one of {[s.name for s in Finding.State]}"
         )
 
     if not isinstance(client, securitycenter.SecurityCenterClient):
@@ -404,7 +405,7 @@ def set_security_marks(scc_name, marks, gcp_org_id=None, credentials=None, clien
         if not passed.
 
     :raises TypeError: if the argument supplied for ``marks`` is not a :py:class:`dict`
-    """
+    """  # noqa: E501
     if not isinstance(marks, dict):
         raise TypeError(
             f"Argument: 'marks' must be a dict! You passed a {type(marks).__name__}."
@@ -450,7 +451,7 @@ def set_mute_status(finding_name, status="MUTED", credentials=None, client=None)
 
     :raises KeyError: if the argument supplied for ``status`` is not ``MUTED``
         or ``UNMUTED`` .
-    """
+    """  # noqa: E501
     if not isinstance(client, securitycenter.SecurityCenterClient):
         client = securitycenter.SecurityCenterClient(credentials=credentials)
 
@@ -471,7 +472,7 @@ def _get_all_findings_iter(request, credentials=None, client=None):
     dictionary and can optionally be supplied with a credentials object.
 
     Returns: :py:class:`gcp_scc:google.cloud.securitycenter_v1.services.security_center.pagers.ListFindingsPager`
-    """
+    """  # noqa: E501
     if not isinstance(client, securitycenter.SecurityCenterClient):
         client = securitycenter.SecurityCenterClient(credentials=credentials)
     return client.list_findings(request)
