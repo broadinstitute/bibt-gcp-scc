@@ -1,0 +1,28 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: bibt-gcp-scc
+  title: bibt-gcp-scc
+  description: "BITS Blue Team Utilities: GCP Security Command Center Module"
+  links:
+    - url: https://bibt-gcp-scc.broadinstitute.org
+      title: bibt-gcp-scc
+      icon: dashboard
+  tags:
+    - bits
+    - bits-tools
+    - security
+  annotations:
+    backstage.io/kubernetes-id: bibt-gcp-scc
+    github.com/project-slug: broadinstitute/bibt-gcp-scc
+    google.com/cloudbuild-project-slug: bits-gke-clusters
+    google.com/cloudbuild-repo-name: bibt-gcp-scc
+    google.com/cloudbuild-location: us-east4
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: API
+  owner: bits-blue-team
+  lifecycle: production
+  system: bibt-libraries
+  
