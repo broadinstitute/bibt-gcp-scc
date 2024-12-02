@@ -1,10 +1,3 @@
-"""
-Classes
-~~~~~~~
-
-Classes which may be used to handle or interact with the SCC API.
-
-"""
 import logging
 
 from google.cloud import securitycenter

@@ -1,10 +1,3 @@
-"""
-Methods
-~~~~~~~
-
-Standalone methods which may be used to interact with the SCC API.
-
-"""
 import logging
 from datetime import datetime
 
