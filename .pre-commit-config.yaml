@@ -1,3 +1,10 @@
+###################################################################
+#                 !!! DO NOT CHANGE THIS FILE !!!                 #
+#              This file is managed by Terraform in               #
+#          the broadinstitute/bibt-terraform repository.          #
+#  Any changes made outside that repository WILL be overwritten.  #
+###################################################################
+
 ci:
   autoupdate_schedule: quarterly
 
@@ -17,14 +24,14 @@ repos:
       - id: requirements-txt-fixer
       - id: trailing-whitespace
 
-  # - repo: https://github.com/Lucas-C/pre-commit-hooks
-  #   rev: v1.5.4
-  #   hooks:
-  #     - id: remove-crlf
-  #     - id: remove-tabs
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.1
+    hooks:
+      - id: remove-crlf
+      - id: remove-tabs
 
   - repo: https://github.com/asottile/reorder-python-imports
-    rev: v3.11.0
+    rev: v3.9.0
     hooks:
       - id: reorder-python-imports
 
@@ -35,11 +42,11 @@ repos:
         args: ["--disable-plugin", "KeywordDetector"]
 
   - repo: https://github.com/psf/black
-    rev: 23.9.1
+    rev: 23.3.0
     hooks:
       - id: black
         # It is recommended to specify the latest version of Python
         # supported by your project here, or alternatively use
         # pre-commit's default_language_version, see
         # https://pre-commit.com/#top_level-default_language_version
-        language_version: python3.11
+        language_version: python3.12
