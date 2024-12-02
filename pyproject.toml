@@ -6,16 +6,15 @@ requires = ["hatchling"]
 packages = ["bibt"]
 
 [project]
-authors = [{name = "Matthew OBrien", email = "mobrien@broadinstitute.org"}]
+authors = [{ name = "Matthew OBrien", email = "mobrien@broadinstitute.org" }]
 classifiers = [
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Topic :: Security",
   "Topic :: Software Development :: Libraries",
   "Topic :: Utilities",
@@ -29,7 +28,7 @@ dependencies = [
 ]
 description = "Functionality often used by BITS Blue Team (GCP SCC Module)."
 name = "bibt-gcp-scc"
-readme = {file = "README.md", content-type = "text/markdown"}
+readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.7"
 version = "1.1.10"
 
